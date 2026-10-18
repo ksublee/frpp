@@ -12,6 +12,8 @@ library, then run from the frpp repository:
 Rscript tools/validate-fast.R results/fast
 # If emhawkes is not the sibling source directory:
 Rscript tools/validate-fast.R results/fast /path/to/emhawkes
+# Include the separate simulate/nobs work when installed from a matching tree:
+Rscript tools/validate-fast.R results/extended /path/to/emhawkes --extended
 ```
 
 The runner tests **installed implementations**, using tests from the source
@@ -21,8 +23,11 @@ installed-code MD5 hashes, session information, per-file logs, elapsed times
 and failures. It does not install packages or alter the source trees.
 
 The shared-kernel development API is required; the runner fails before testing
-if it is absent. It discovers every ordinary FRPP test and adds three emhawkes
-shared-interface tests. Each file runs sequentially in a fresh R process.
+if it is absent. It discovers every ordinary FRPP test and adds emhawkes's
+public shared-kernel test. `--extended` additionally requires the separate
+simulate/observation-count development tests and their matching implementation.
+Missing selected files fail validation; they are not silently skipped. Each
+file runs sequentially in a fresh R process.
 Missing optional maxLik coverage is explicitly reported. Install maxLik to
 exercise both optimizer providers.
 
@@ -102,3 +107,11 @@ validity, accessors, legacy S3 conversion, callback preservation and dual
 S3/S4 dispatch. The final 2026-10-18 run passed all 11 files in 15.58 seconds
 including parent R startup/report preparation. Saved 10,000-row fits replayed
 in 28.16 seconds without optimization. See [S4 results](fspec-s4-results.md).
+
+## Public-kernel scope
+
+The default suite now uses only the published common-kernel contract: eight
+FRPP files and one emhawkes kernel file. The two tests for separately pending
+simulate/nobs work require `--extended`. The earlier 11-file measurements above
+refer to that broader development tree. This separation lets the default suite
+run against the exact common-kernel-only emhawkes publication.

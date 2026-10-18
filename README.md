@@ -28,4 +28,4 @@ path <- fsim(model, size = 1000, seed = 73, lambda_component0 = 0)
 ```
 
 The default backend uses emhawkes 1.0.0 or later. The experimental `state`
-backend requires a shared-kernel API that is not yet published in emhawkes.
+backend uses the public kernel API in GitHub development emhawkes 1.0.1.9000.

@@ -1,5 +1,9 @@
 # frpp 0.0.0.9000
 
+- Document the public state API in GitHub development emhawkes 1.0.1.9000.
+  Limit the default quick suite to its common-kernel contract; retain the
+  separately pending simulate/nobs checks behind an explicit --extended option.
+
 - Add a quick joint regression runner with a fixed small fitting fixture,
   isolated test sessions and source/installed-code provenance. Keep saved-fit
   replay and expensive full re-estimation as separate validation steps.

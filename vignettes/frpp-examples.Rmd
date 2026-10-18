@@ -32,7 +32,8 @@ assembles the FRPP likelihood from the public kernel replay API, excluding the b
 Kernel components are driving quantities, rather than the conditional intensity
 of a general FRPP. All dimensions redraw candidate residuals after every event.
 
-The optional state comparisons require the unreleased shared-kernel API.
+The optional state comparisons require the public shared-kernel API in
+GitHub development emhawkes 1.0.1.9000.
 When it is not installed, simulations and bridge likelihoods still run, and
 state comparisons are reported as unavailable rather than as successful checks.
 

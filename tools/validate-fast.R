@@ -1,7 +1,9 @@
 # From the frpp repository, after installing both CURRENT source trees:
-# Rscript tools/validate-fast.R results/fast [path/to/emhawkes]
+# Rscript tools/validate-fast.R results/fast [path/to/emhawkes] [--extended]
 # Installed packages supply implementation; source trees supply tests.
 args <- commandArgs(TRUE)
+extended <- "--extended" %in% args
+args <- args[args != "--extended"]
 if (length(args) < 1L || length(args) > 2L)
   stop("Supply an output directory and optionally the emhawkes source directory.")
 frpp_root <- normalizePath(".", mustWork = TRUE)
@@ -20,9 +22,11 @@ out <- normalizePath(out, mustWork = TRUE)
 # Discover every ordinary FRPP test: future regression files must not be missed.
 frpp_tests <- sort(list.files(file.path(frpp_root, "tests"), "[.]R$", full.names = TRUE))
 if (!length(frpp_tests)) stop("No FRPP tests found.")
-em_tests <- file.path(em_root, "tests", c("exp-kernel.R", "simulate-interface.R", "fit-observations.R"))
+em_tests <- file.path(em_root, "tests", c("exp-kernel.R",
+  if (extended) c("simulate-interface.R", "fit-observations.R")))
 tests <- c(frpp_tests, em_tests)
-stopifnot(all(file.exists(tests)))
+missing_tests <- tests[!file.exists(tests)]
+if (length(missing_tests)) stop("Selected test files are missing: ", paste(missing_tests, collapse = ", "))
 labels <- c(paste0("frpp/", basename(frpp_tests)), paste0("emhawkes/", basename(em_tests)))
 libraries <- file.path(out, "libraries.rds")
 saveRDS(.libPaths(), libraries)
@@ -31,7 +35,9 @@ writeLines(c("args <- commandArgs(TRUE)", ".libPaths(readRDS(args[1L]))",
   "sys.source(args[2L], envir = .GlobalEnv)"), wrapper)
 executable <- file.path(R.home("bin"), if (.Platform$OS.type == "windows") "Rscript.exe" else "Rscript")
 has_maxlik <- requireNamespace("maxLik", quietly = TRUE)
-coverage <- c("Scope: all FRPP tests plus the three shared-interface emhawkes tests.",
+coverage <- c(if (extended)
+  "Scope: all FRPP tests, the shared kernel, and the additional simulate/observation-count development tests." else
+  "Scope: all FRPP tests plus the public shared-kernel emhawkes test.",
   "Tests execute INSTALLED implementations. Reinstall both source trees after runtime edits; hashes record identity, not source/install equivalence.",
   paste0("maxLik: ", if (has_maxlik) "included" else "NOT INSTALLED; optional provider cases will not run"),
   "Not a replacement for full R CMD check, platform CI, large joint fits or coverage experiments.",

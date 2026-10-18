@@ -35,7 +35,8 @@ A Hawkes stationary mean is not automatically applied to FRPP.}
 \item{backend}{\code{bridge} delegates to the existing FRPP likelihood.
 \code{state} independently assembles the residual likelihood from the
 kernel's public replay output. This requires the emhawkes development kernel
-API; with earlier versions, use \code{bridge}.}
+API, available in GitHub development emhawkes 1.0.1.9000; with earlier
+versions, use \code{bridge}.}
 \item{...}{Additional public emhawkes arguments for the bridge.
 The state prototype accepts none.}
 }
