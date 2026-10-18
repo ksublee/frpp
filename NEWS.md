@@ -1,5 +1,13 @@
 # frpp 0.0.0.9000
 
+- Verify the 10,000-row migrated fit against the original emhawkes interface
+  in three paired repetitions; document exact estimates and optimizer curvature,
+  restored likelihoods, unavailable Wald covariance and elapsed fitting times.
+
+- Preserve the full original emhawkes FRPP examples in a compatibility vignette,
+  alongside the new-interface examples. Document the planned migration while
+  retaining simple residual-law uses and Hawkes residual diagnostics in emhawkes.
+
 - Add `fsim()` as the primary simulation function. Existing `simulate()`
   methods call it, preserving path and RNG behavior and old serialized classes.
 - Assemble numeric state-backend likelihoods using the experimental public

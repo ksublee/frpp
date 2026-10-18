@@ -12,7 +12,9 @@ law; it does not inherit from the Hawkes specification.
 
 - [Get started](articles/get-started.html): installation, a first model and simulation.
 - [Examples](articles/frpp-examples.html): one- and two-dimensional models migrated from emhawkes.
+- [Legacy emhawkes examples](articles/emhawkes-compatibility.html): the complete original FRPP examples and fitting code.
 - [Fitting and inference](articles/fitting-and-inference.html): optimizers, identification, diagnostics and restoration.
+- [10,000-row fit validation](articles/legacy-fit-validation.html): matched original and migrated estimates, curvature and elapsed times.
 - [Model and computation](articles/model-and-computation.html): residual refresh rules, kernel mapping and the emhawkes boundary.
 - [Function reference](reference/index.html): arguments and return values.
 

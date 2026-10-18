@@ -100,3 +100,9 @@ Continuing a path requires its terminal state.
 Save results with `saveRDS()` and restore them with `readRDS()`. Captured
 callback environments remain references to external state; saving a fit does
 not automatically freeze that external state.
+
+## Validation of the migrated example
+
+See the [10,000-row comparison](legacy-fit-validation.html) for matching
+`hfit()` and `ffit()` estimates, saved-fit replay and the unavailable Wald
+covariance in the trapezoid-exponential example.
