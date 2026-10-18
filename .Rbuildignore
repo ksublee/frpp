@@ -7,3 +7,8 @@
 ^.*[.]Rproj$
 ^frpp[.]Rcheck$
 ^frpp_.*[.]tar[.]gz$
+^docs$
+^pkgdown$
+^vignettes_ext$
+^_pkgdown[.]yml$
+^[.]github$

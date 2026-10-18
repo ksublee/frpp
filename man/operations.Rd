@@ -68,6 +68,8 @@ model <- fspec(kernel, residual_law(c(shape = 2, rate = 2),
     stats::dgamma, stats::pgamma, stats::qgamma, stats::rgamma))
 path <- fsim(model, size = 12, seed = 73, lambda_component0 = 0)
 stats::logLik(model, path$inter_arrival, path$type, lambda_component0 = 0)
-stats::logLik(model, path$inter_arrival, path$type, lambda_component0 = 0,
-              backend = "state")
+if ("exp_kernel_replay" \%in\% getNamespaceExports("emhawkes")) {
+  stats::logLik(model, path$inter_arrival, path$type, lambda_component0 = 0,
+                backend = "state")
+}
 }

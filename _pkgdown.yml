@@ -1,0 +1,47 @@
+url: https://ksublee.github.io/frpp/
+template:
+  bootstrap: 5
+development:
+  mode: unreleased
+home:
+  title: Flexible residual point processes in R
+navbar:
+  structure:
+    left: [intro, examples, guides, reference, news]
+    right: [search, github]
+  components:
+    intro:
+      text: Get started
+      href: articles/get-started.html
+    examples:
+      text: Examples
+      href: articles/frpp-examples.html
+    guides:
+      text: Guides
+      menu:
+      - text: Fitting and inference
+        href: articles/fitting-and-inference.html
+      - text: Model and computation
+        href: articles/model-and-computation.html
+articles:
+- title: Get started
+  contents:
+  - articles/get-started
+- title: Examples
+  contents:
+  - frpp-examples
+- title: Guides
+  contents:
+  - articles/fitting-and-inference
+  - articles/model-and-computation
+reference:
+- title: Model specification
+  contents:
+  - frpp_spec
+  - residual_law
+- title: Simulation and likelihood
+  contents:
+  - simulate.frpp_spec
+- title: Fitting and diagnostics
+  contents:
+  - ffit

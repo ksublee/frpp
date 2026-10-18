@@ -11,6 +11,8 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(frpp)
 stopifnot(!("package:emhawkes" %in% search()))
+has_kernel_api <- all(c("as_exp_kernel", "exp_kernel_replay") %in%
+  getNamespaceExports("emhawkes"))
 ```
 
 These three examples come from the flexible-residual section of
@@ -25,6 +27,10 @@ assembles the FRPP likelihood from the public kernel replay API, excluding the b
 Kernel components are driving quantities, rather than the conditional intensity
 of a general FRPP. All dimensions redraw candidate residuals after every event.
 
+The optional state comparisons require the unreleased shared-kernel API.
+When it is not installed, simulations and bridge likelihoods still run, and
+state comparisons are reported as unavailable rather than as successful checks.
+
 ## One dimension: trapezoid-exponential residuals
 
 ```{r one-dimensional-model}
@@ -38,9 +44,10 @@ path_1d <- fsim(model_1d, size = 3000, lambda_component0 = 0)
 seed_1d <- .Random.seed
 inferred_1d <- logLik(model_1d, path_1d$inter_arrival,
   lambda_component0 = 0, infer = TRUE)
-state_1d <- logLik(model_1d, path_1d$inter_arrival,
-  lambda_component0 = 0, infer = TRUE, backend = "state")
-c(bridge = inferred_1d$loglikelihood, state = state_1d$loglikelihood)
+state_1d <- if (has_kernel_api) logLik(model_1d, path_1d$inter_arrival,
+  lambda_component0 = 0, infer = TRUE, backend = "state") else NULL
+c(bridge = inferred_1d$loglikelihood,
+  state = if (has_kernel_api) state_1d$loglikelihood else NA_real_)
 ```
 
 ```{r one-dimensional-residuals, fig.width=6, fig.height=4}
@@ -61,9 +68,10 @@ path_2d <- fsim(model_2d, size = 10000, lambda_component0 = 0)
 seed_2d <- .Random.seed
 inferred_2d <- logLik(model_2d, path_2d$inter_arrival, path_2d$type,
   lambda_component0 = 0, infer = TRUE)
-state_2d <- logLik(model_2d, path_2d$inter_arrival, path_2d$type,
-  lambda_component0 = 0, infer = TRUE, backend = "state")
-c(bridge = inferred_2d$loglikelihood, state = state_2d$loglikelihood)
+state_2d <- if (has_kernel_api) logLik(model_2d, path_2d$inter_arrival, path_2d$type,
+  lambda_component0 = 0, infer = TRUE, backend = "state") else NULL
+c(bridge = inferred_2d$loglikelihood,
+  state = if (has_kernel_api) state_2d$loglikelihood else NA_real_)
 ```
 
 ```{r two-dimensional-residuals, fig.width=6, fig.height=4}
@@ -87,9 +95,10 @@ path_uniform <- fsim(model_uniform, size = 5000, lambda_component0 = 0)
 seed_uniform <- .Random.seed
 inferred_uniform <- logLik(model_uniform, path_uniform$inter_arrival,
   path_uniform$type, lambda_component0 = 0, infer = TRUE)
-state_uniform <- logLik(model_uniform, path_uniform$inter_arrival,
-  path_uniform$type, lambda_component0 = 0, infer = TRUE, backend = "state")
-c(bridge = inferred_uniform$loglikelihood, state = state_uniform$loglikelihood)
+state_uniform <- if (has_kernel_api) logLik(model_uniform, path_uniform$inter_arrival,
+  path_uniform$type, lambda_component0 = 0, infer = TRUE, backend = "state") else NULL
+c(bridge = inferred_uniform$loglikelihood,
+  state = if (has_kernel_api) state_uniform$loglikelihood else NA_real_)
 ```
 
 ```{r uniform-residuals, fig.width=6, fig.height=4}
@@ -136,11 +145,11 @@ compare_example <- function(reference, path, seed_after, bridge, state) {
     mark = old$mark, lambda_component0 = 0, infer = TRUE)
   stopifnot(identical(bridge, expected))
   shared <- names(expected)
-  stopifnot(isTRUE(all.equal(state[shared], expected, tolerance = 1e-10)))
+  if (!is.null(state)) stopifnot(isTRUE(all.equal(state[shared], expected, tolerance = 1e-10)))
   data.frame(rows = length(path$type), simulation_exact = TRUE, rng_exact = TRUE,
     bridge_exact = TRUE,
-    state_loglik_difference = state$loglikelihood - expected$loglikelihood,
-    maximum_state_output_difference = max(vapply(shared, function(nm)
+    state_loglik_difference = if (is.null(state)) NA_real_ else state$loglikelihood - expected$loglikelihood,
+    maximum_state_output_difference = if (is.null(state)) NA_real_ else max(vapply(shared, function(nm)
       if (length(expected[[nm]])) max(abs(state[[nm]] - expected[[nm]])) else 0,
       numeric(1))))
 }
@@ -180,14 +189,14 @@ fdiagnostics(fit)
 fitted_model <- fitted(fit)
 fitted_bridge <- do.call(logLik, c(list(object = fitted_model,
   inter_arrival = path_2d$inter_arrival, type = path_2d$type), finitial_state(fit)))
-fitted_state <- do.call(logLik, c(list(object = fitted_model,
+fitted_state <- if (has_kernel_api) do.call(logLik, c(list(object = fitted_model,
   inter_arrival = path_2d$inter_arrival, type = path_2d$type, backend = "state"),
-  finitial_state(fit)))
+  finitial_state(fit))) else NULL
 c(optimized = as.numeric(logLik(fit)), bridge = as.numeric(fitted_bridge),
-  state = as.numeric(fitted_state))
+  state = if (has_kernel_api) as.numeric(fitted_state) else NA_real_)
 stopifnot(fdiagnostics(fit)$optimizer_success,
   isTRUE(all.equal(as.numeric(logLik(fit)), as.numeric(fitted_bridge), tolerance = 1e-10)),
-  isTRUE(all.equal(fitted_bridge, fitted_state, tolerance = 1e-10)))
+  is.null(fitted_state) || isTRUE(all.equal(fitted_bridge, fitted_state, tolerance = 1e-10)))
 ```
 
 The moving transition of `tzexp` can make the likelihood nonsmooth at the

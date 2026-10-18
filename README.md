@@ -6,6 +6,8 @@ kernels from [emhawkes](https://github.com/ksublee/emhawkes) with custom residua
 Use `fspec()` to define a model, `fsim()` to simulate, `logLik()` to evaluate
 its likelihood, and `ffit()` to estimate parameters. This package is under development.
 
+[Documentation](https://ksublee.github.io/frpp/)
+
 ## Installation
 
 ```r

@@ -13,5 +13,5 @@ Depends: R (>= 4.0.0)
 Imports: emhawkes (>= 1.0.0), methods, stats
 Suggests: knitr, rmarkdown, maxLik
 VignetteBuilder: knitr
-URL: https://github.com/ksublee/frpp
+URL: https://ksublee.github.io/frpp/, https://github.com/ksublee/frpp
 BugReports: https://github.com/ksublee/frpp/issues
