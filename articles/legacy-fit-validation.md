@@ -74,7 +74,8 @@ work.
 
 ## Elapsed fitting time
 
-The two interfaces were warmed up, then timed sequentially in
+The two public likelihood routes were evaluated three times before
+timing. The full fitting calls were then timed sequentially in
 alternating order: hfit/ffit, ffit/hfit, hfit/ffit. Package loading,
 simulation, likelihood warm-up and post-fit replay were excluded. No
 package builds or checks ran alongside these measurements. Times include
