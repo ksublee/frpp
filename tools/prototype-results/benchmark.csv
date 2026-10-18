@@ -1,0 +1,7 @@
+"size","backend","median_seconds","cumulative_allocation_bytes","absolute_likelihood_difference"
+100,"legacy",0,41920,0
+100,"bridge",0,41920,0
+100,"state",0.01,50392,2.8421709430404e-14
+2000,"legacy",0.13,809520,0
+2000,"bridge",0.14,809520,0
+2000,"state",0.14,969992,1.36424205265939e-11

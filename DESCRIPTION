@@ -1,0 +1,17 @@
+Package: frpp
+Title: Flexible Residual Point Processes
+Version: 0.0.0.9000
+Authors@R: person("Kyungsub", "Lee", email = "kyungsub@gmail.com", role = c("aut", "cre"))
+Description: A local prototype separating an exponential kernel specification
+    from its residual distribution. Reuses the public emhawkes interface and
+    compares a compatibility bridge with separately assembled residual likelihoods.
+    Provides maximum likelihood fitting, fitted-model reconstruction and
+    optimizer and covariance diagnostics.
+License: GPL (>= 2)
+Encoding: UTF-8
+Depends: R (>= 4.0.0)
+Imports: emhawkes (>= 1.0.0), methods, stats
+Suggests: knitr, rmarkdown, maxLik
+VignetteBuilder: knitr
+URL: https://github.com/ksublee/frpp
+BugReports: https://github.com/ksublee/frpp/issues

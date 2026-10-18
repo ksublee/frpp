@@ -1,0 +1,9 @@
+^README[.]md$
+^tools$
+^results$
+^[.]git$
+^[.]gitignore$
+^[.]Rproj[.]user$
+^.*[.]Rproj$
+^frpp[.]Rcheck$
+^frpp_.*[.]tar[.]gz$
