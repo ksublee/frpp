@@ -69,6 +69,11 @@ explain these limits.
   [`as_frpp()`](https://ksublee.github.io/frpp/reference/frpp_spec.md)
   [`as_legacy_hspec()`](https://ksublee.github.io/frpp/reference/frpp_spec.md)
   : Compose a Kernel Specification and a Residual Law
+- [`fkernel()`](https://ksublee.github.io/frpp/reference/fcomponents.md)
+  [`` `fkernel<-`() ``](https://ksublee.github.io/frpp/reference/fcomponents.md)
+  [`fresidual()`](https://ksublee.github.io/frpp/reference/fcomponents.md)
+  [`` `fresidual<-`() ``](https://ksublee.github.io/frpp/reference/fcomponents.md)
+  : Access Components of an FRPP Specification
 - [`residual_law()`](https://ksublee.github.io/frpp/reference/residual_law.md)
   : Bundle Residual Distribution Functions
 

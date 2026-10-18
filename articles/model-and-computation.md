@@ -2,12 +2,20 @@
 
 ## Composition and dependency direction
 
-An `fspec` contains two components:
+An S4 `fspec` contains two model components:
 
 - `kernel`: an emhawkes `hspec`, without a residual law.
 - `residual`: a
   [`residual_law()`](https://ksublee.github.io/frpp/reference/residual_law.md)
   object.
+
+Use `fkernel(model)` and `fresidual(model)` to read components, or the
+corresponding replacement functions to update them. Replacement
+validates the specification. Existing `$kernel` and `$residual` access
+remains supported. The class also records the global refresh rule and a
+representation version; it does not store evolving simulation state. The
+residual law remains S3. Use `methods::is(model, "fspec")` for class
+checks; the new class does not inherit the old S3 `frpp_spec` class.
 
 The dependency is `frpp -> emhawkes`. The FRPP object does not inherit
 from `hspec`, so Hawkes methods are not silently applied to it. The
@@ -108,8 +116,10 @@ The old
 [`frpp_spec()`](https://ksublee.github.io/frpp/reference/frpp_spec.md)
 constructor and serialized class remain compatible.
 [`as_fspec()`](https://ksublee.github.io/frpp/reference/frpp_spec.md)
-converts an older FRPP `hspec`. Callback functions keep their
-environments and default bindings during conversion.
+converts an older FRPP `hspec` or either saved S3 specification class to
+S4. Public operations also accept those S3 specifications. Callback
+functions keep their environments and default bindings during
+conversion.
 
 ## Migration from emhawkes
 

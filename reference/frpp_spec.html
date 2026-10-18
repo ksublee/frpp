@@ -87,14 +87,28 @@ Conversion preserves callback functions and their default bindings without
 executing them. Captured environments remain references, as in emhawkes.
 The primary constructor is <code>fspec</code>, matching the <code>hspec</code> naming convention.
 <code>frpp_spec</code> and <code>as_frpp</code> remain compatibility names. New objects have
-classes <code>c("fspec", "frpp_spec")</code>; saved objects from the first prototype
-can still use the old simulation and likelihood methods.
+S4 class <code>fspec</code>, with typed <code>kernel</code>, <code>residual</code>,
+<code>refresh</code> and <code>version</code> slots. The class composes an <code>hspec</code>;
+it does not inherit from it. The residual law retains its S3 representation. Use <code>methods::is(model, "fspec")</code>
+for class checks; new objects no longer inherit the old S3 <code>frpp_spec</code> class.
+Saved S3 objects with class <code>frpp_spec</code> or
+<code>c("fspec", "frpp_spec")</code> are upgraded by <code>as_fspec</code>; simulation,
+likelihood and fitting entry points also accept them. Fitted models restored
+from earlier fit objects are upgraded on extraction.</p>
+<p>Use <code>fkernel</code> and <code>fresidual</code> for component access and replacement.
+List-style <code>$kernel</code> and <code>$residual</code> remain available for compatibility.
+Constructors and public operations validate the specification without running
+user callbacks. Validity checks include numeric kernel shapes, decay rates,
+mapping, residual structure and the supported global refresh rule. Function
+outputs, distribution-specific domains and stationarity are not established
+by object validation. Direct slot edits should be followed by
+<code><a href="https://rdrr.io/r/methods/validObject.html" class="external-link">methods::validObject</a></code>.
 The adapter is transitional: it restores the old FRPP representation to use
 existing public emhawkes operations. It is not a pure Hawkes specification.</p>
     </div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p><code>frpp_spec</code> and <code>as_frpp</code> return a composition object.
+    <p><code>frpp_spec</code> and <code>as_frpp</code> return an S4 <code>fspec</code> composition object.
 <code>as_legacy_hspec</code> returns an <code>hspec</code> carrying the residual callbacks.</p>
     </div>
     <div class="section level2">
@@ -110,7 +124,7 @@ existing public emhawkes operations. It is not a pure Hawkes specification.</p>
 <span class="r-in"><span>                    name <span class="op">=</span> <span class="st">"Gamma(2,2)"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">fspec</span><span class="op">(</span><span class="va">kernel</span>, <span class="va">law</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">model</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> FRPP specification (fspec)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> FRPP specification (S4 fspec)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Event types: 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Residual law: Gamma(2,2)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Residual candidates refreshed after every global event.</span>

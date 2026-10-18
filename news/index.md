@@ -2,6 +2,17 @@
 
 ## frpp 0.0.0.9000
 
+- Add a quick joint regression runner with a fixed small fitting
+  fixture, isolated test sessions and source/installed-code provenance.
+  Keep saved-fit replay and expensive full re-estimation as separate
+  validation steps.
+
+- Convert `fspec` to an independent S4 composition class with typed
+  slots, semantic validation, component accessors and S3/S4 method
+  dispatch. Upgrade earlier S3 specifications and fitted models while
+  retaining list-style component access, callback bindings, calculation
+  and RNG behavior.
+
 - Verify the 10,000-row migrated fit against the original emhawkes
   interface in three paired repetitions; document exact estimates and
   optimizer curvature, restored likelihoods, unavailable Wald covariance

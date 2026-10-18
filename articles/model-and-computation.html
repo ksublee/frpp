@@ -80,7 +80,7 @@
 <div class="section level2">
 <h2 id="composition-and-dependency-direction">Composition and dependency direction<a class="anchor" aria-label="anchor" href="#composition-and-dependency-direction"></a>
 </h2>
-<p>An <code>fspec</code> contains two components:</p>
+<p>An S4 <code>fspec</code> contains two model components:</p>
 <ul>
 <li>
 <code>kernel</code>: an emhawkes <code>hspec</code>, without a
@@ -88,6 +88,15 @@ residual law.</li>
 <li>
 <code>residual</code>: a <code><a href="../reference/residual_law.html">residual_law()</a></code> object.</li>
 </ul>
+<p>Use <code>fkernel(model)</code> and <code>fresidual(model)</code> to
+read components, or the corresponding replacement functions to update
+them. Replacement validates the specification. Existing
+<code>$kernel</code> and <code>$residual</code> access remains
+supported. The class also records the global refresh rule and a
+representation version; it does not store evolving simulation state. The
+residual law remains S3. Use <code>methods::is(model, "fspec")</code>
+for class checks; the new class does not inherit the old S3
+<code>frpp_spec</code> class.</p>
 <p>The dependency is <code>frpp -&gt; emhawkes</code>. The FRPP object
 does not inherit from <code>hspec</code>, so Hawkes methods are not
 silently applied to it. The compatibility adapter
@@ -214,8 +223,9 @@ own likelihood and optimizer curvature; Hawkes-specific Hessian
 stabilization is not applied.</p>
 <p>The old <code><a href="../reference/frpp_spec.html">frpp_spec()</a></code> constructor and serialized class
 remain compatible. <code><a href="../reference/frpp_spec.html">as_fspec()</a></code> converts an older FRPP
-<code>hspec</code>. Callback functions keep their environments and
-default bindings during conversion.</p>
+<code>hspec</code> or either saved S3 specification class to S4. Public
+operations also accept those S3 specifications. Callback functions keep
+their environments and default bindings during conversion.</p>
 </div>
 <div class="section level2">
 <h2 id="migration-from-emhawkes">Migration from emhawkes<a class="anchor" aria-label="anchor" href="#migration-from-emhawkes"></a>

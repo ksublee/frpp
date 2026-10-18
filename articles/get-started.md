@@ -29,7 +29,7 @@ law <- residual_law(c(shape = 2, rate = 2),
   quantile = stats::qgamma, rng = stats::rgamma, name = "Gamma(2,2)")
 model <- fspec(kernel, law)
 model
-#> FRPP specification (fspec)
+#> FRPP specification (S4 fspec)
 #> Event types: 1
 #> Residual law: Gamma(2,2)
 #> Residual candidates refreshed after every global event.
