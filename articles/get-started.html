@@ -85,17 +85,21 @@
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"ksublee/frpp"</span>, build_vignettes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p>The default backend requires emhawkes 1.0.0 or later. The optional
-<code>state</code> backend needs an additional shared-kernel API from
-the emhawkes development work. It reports an explicit error if that API
-is unavailable. Until that API is published, use the default backend and
-skip vignette building on installation.</p>
+<code>state</code> backend uses the public shared-kernel API in GitHub
+development emhawkes 1.0.1.9000. Install that development version when
+using state calculations:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"ksublee/emhawkes"</span>, build_vignettes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<p>The default bridge works without that API. State requests report an
+explicit error when the API is absent. See the <a href="https://ksublee.github.io/emhawkes/articles/shared-kernel.html" class="external-link">shared-kernel
+contract</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="define-a-model">Define a model<a class="anchor" aria-label="anchor" href="#define-a-model"></a>
 </h2>
 <p>A model combines an emhawkes kernel with a residual law. The
 following law has Gamma shape 2 and rate 2, hence mean 1:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">kernel</span> <span class="op">&lt;-</span> <span class="fu">methods</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/methods/new.html" class="external-link">new</a></span><span class="op">(</span><span class="st">"hspec"</span>, mu <span class="op">=</span> <span class="fl">0.3</span>, alpha <span class="op">=</span> <span class="fl">0.2</span>, beta <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">law</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/residual_law.html">residual_law</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>shape <span class="op">=</span> <span class="fl">2</span>, rate <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
 <span>  density <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">dgamma</a></span>, cdf <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">pgamma</a></span>,</span>
@@ -118,7 +122,7 @@ backend.</p>
 <div class="section level2">
 <h2 id="simulate-and-inspect-a-path">Simulate and inspect a path<a class="anchor" aria-label="anchor" href="#simulate-and-inspect-a-path"></a>
 </h2>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/operations.html">fsim</a></span><span class="op">(</span><span class="va">model</span>, size <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">73</span>, lambda_component0 <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="va">path</span><span class="op">$</span><span class="va">inter_arrival</span><span class="op">)</span>,</span>
 <span>  type <span class="op">=</span> <span class="va">path</span><span class="op">$</span><span class="va">type</span>, mark <span class="op">=</span> <span class="va">path</span><span class="op">$</span><span class="va">mark</span><span class="op">)</span><span class="op">)</span></span>
@@ -141,7 +145,7 @@ component; a matrix must match the kernel shape. FRPP’s automatic rule
 selects zero, with a message recommending an explicit state. A Hawkes
 stationary mean is not assumed for a general residual law.</p>
 <p>The standard interface returns the same path:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">same_path</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/simulate.html" class="external-link">simulate</a></span><span class="op">(</span><span class="va">model</span>, size <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">73</span>,</span>
 <span>  lambda_component0 <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">path</span>, <span class="va">same_path</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -152,7 +156,7 @@ simulation advances the caller’s RNG normally.</p>
 <div class="section level2">
 <h2 id="evaluate-the-likelihood">Evaluate the likelihood<a class="anchor" aria-label="anchor" href="#evaluate-the-likelihood"></a>
 </h2>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">path</span><span class="op">$</span><span class="va">inter_arrival</span>, <span class="va">path</span><span class="op">$</span><span class="va">type</span>, mark <span class="op">=</span> <span class="va">path</span><span class="op">$</span><span class="va">mark</span>,</span>
 <span>  lambda_component0 <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="co">#&gt; loglikelihood </span></span>

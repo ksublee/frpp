@@ -50,9 +50,9 @@ renewal clock for each dimension.
 
 The default likelihood backend and simulator use public emhawkes
 interfaces. The experimental `state` backend assembles the FRPP
-likelihood from a shared kernel replay API. That API is not yet included
-in the published emhawkes sources; examples detect whether it is
-installed and label unavailable comparisons.
+likelihood from a shared kernel replay API available in GitHub
+development emhawkes 1.0.1.9000. Examples detect whether it is installed
+and label unavailable comparisons.
 
 Residual parameters remain fixed during fitting unless joint estimation
 is requested. A successful optimizer or a positive covariance matrix

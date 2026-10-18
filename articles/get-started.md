@@ -11,10 +11,18 @@ remotes::install_github("ksublee/frpp", build_vignettes = FALSE)
 ```
 
 The default backend requires emhawkes 1.0.0 or later. The optional
-`state` backend needs an additional shared-kernel API from the emhawkes
-development work. It reports an explicit error if that API is
-unavailable. Until that API is published, use the default backend and
-skip vignette building on installation.
+`state` backend uses the public shared-kernel API in GitHub development
+emhawkes 1.0.1.9000. Install that development version when using state
+calculations:
+
+``` r
+
+remotes::install_github("ksublee/emhawkes", build_vignettes = FALSE)
+```
+
+The default bridge works without that API. State requests report an
+explicit error when the API is absent. See the [shared-kernel
+contract](https://ksublee.github.io/emhawkes/articles/shared-kernel.html).
 
 ## Define a model
 

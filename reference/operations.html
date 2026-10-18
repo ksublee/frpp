@@ -103,7 +103,8 @@ A Hawkes stationary mean is not automatically applied to FRPP.</p></dd>
 <dd><p><code>bridge</code> delegates to the existing FRPP likelihood.
 <code>state</code> independently assembles the residual likelihood from the
 kernel's public replay output. This requires the emhawkes development kernel
-API; with earlier versions, use <code>bridge</code>.</p></dd>
+API, available in GitHub development emhawkes 1.0.1.9000; with earlier
+versions, use <code>bridge</code>.</p></dd>
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional public emhawkes arguments for the bridge.
@@ -153,6 +154,8 @@ No fitted degrees of freedom or confidence intervals are supplied.</p>
 <span class="r-in"><span>  <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">path</span><span class="op">$</span><span class="va">inter_arrival</span>, <span class="va">path</span><span class="op">$</span><span class="va">type</span>, lambda_component0 <span class="op">=</span> <span class="fl">0</span>,</span></span>
 <span class="r-in"><span>                backend <span class="op">=</span> <span class="st">"state"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> loglikelihood </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     -22.68649 </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -63,7 +63,8 @@ logLik(object, inter_arrival, type = NULL, mark = NULL,
   `bridge` delegates to the existing FRPP likelihood. `state`
   independently assembles the residual likelihood from the kernel's
   public replay output. This requires the emhawkes development kernel
-  API; with earlier versions, use `bridge`.
+  API, available in GitHub development emhawkes 1.0.1.9000; with earlier
+  versions, use `bridge`.
 
 - ...:
 
@@ -119,4 +120,6 @@ if ("exp_kernel_replay" %in% getNamespaceExports("emhawkes")) {
   stats::logLik(model, path$inter_arrival, path$type, lambda_component0 = 0,
                 backend = "state")
 }
+#> loglikelihood 
+#>     -22.68649 
 ```

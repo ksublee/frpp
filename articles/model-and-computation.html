@@ -199,8 +199,10 @@ parameter mapping, optimization and reconstruction</td>
 <p>The <code>state</code> backend requires numeric baseline and kernel
 parameters, equal decay rates within a row, and no impact or
 mark-density callbacks. Numeric <code>eta</code>, observed marks and
-kernel mappings are supported. It requires the unreleased shared-kernel
-API and reports an explicit error when that API is absent.</p>
+kernel mappings are supported. It requires the public shared-kernel API
+available in GitHub development emhawkes 1.0.1.9000 and reports an
+explicit error when that API is absent. The <a href="https://ksublee.github.io/emhawkes/articles/shared-kernel.html" class="external-link">shared-kernel
+guide</a> defines its input and output contract.</p>
 <p>Replay supplies kernel-only interval integrals, pre-event sums and a
 final component state. FRPP adds the baseline contribution. Full
 component histories are requested only for <code>infer = TRUE</code>;

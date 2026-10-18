@@ -20,10 +20,10 @@ replay API, excluding the baseline. Kernel components are driving
 quantities, rather than the conditional intensity of a general FRPP. All
 dimensions redraw candidate residuals after every event.
 
-The optional state comparisons require the unreleased shared-kernel API.
-When it is not installed, simulations and bridge likelihoods still run,
-and state comparisons are reported as unavailable rather than as
-successful checks.
+The optional state comparisons require the public shared-kernel API in
+GitHub development emhawkes 1.0.1.9000. When it is not installed,
+simulations and bridge likelihoods still run, and state comparisons are
+reported as unavailable rather than as successful checks.
 
 ## One dimension: trapezoid-exponential residuals
 
@@ -44,7 +44,7 @@ state_1d <- if (has_kernel_api) logLik(model_1d, path_1d$inter_arrival,
 c(bridge = inferred_1d$loglikelihood,
   state = if (has_kernel_api) state_1d$loglikelihood else NA_real_)
 #>   bridge    state 
-#> 1114.393       NA
+#> 1114.393 1114.393
 ```
 
 ``` r
@@ -74,7 +74,7 @@ state_2d <- if (has_kernel_api) logLik(model_2d, path_2d$inter_arrival, path_2d$
 c(bridge = inferred_2d$loglikelihood,
   state = if (has_kernel_api) state_2d$loglikelihood else NA_real_)
 #>    bridge     state 
-#> -12413.76        NA
+#> -12413.76 -12413.76
 ```
 
 ``` r
@@ -113,7 +113,7 @@ state_uniform <- if (has_kernel_api) logLik(model_uniform, path_uniform$inter_ar
 c(bridge = inferred_uniform$loglikelihood,
   state = if (has_kernel_api) state_uniform$loglikelihood else NA_real_)
 #>    bridge     state 
-#> -7287.486        NA
+#> -7287.486 -7287.486
 ```
 
 ``` r
@@ -184,9 +184,9 @@ comparison
 #> tzexp_2d   10000             TRUE      TRUE         TRUE
 #> uniform_2d  5000             TRUE      TRUE         TRUE
 #>            state_loglik_difference maximum_state_output_difference
-#> tzexp_1d                        NA                              NA
-#> tzexp_2d                        NA                              NA
-#> uniform_2d                      NA                              NA
+#> tzexp_1d             -7.048584e-12                    7.048584e-12
+#> tzexp_2d              5.456968e-12                    5.456968e-12
+#> uniform_2d            4.947651e-10                    4.947651e-10
 ```
 
 ## Estimation with ffit
