@@ -1,0 +1,54 @@
+# Flexible Residual Point Processes
+
+**frpp** combines exponential kernels from
+[emhawkes](https://ksublee.github.io/emhawkes/) with a user-specified
+residual distribution. It provides model specification, simulation,
+likelihood evaluation and maximum likelihood estimation.
+
+This is a development package. Its model object contains a kernel and a
+residual law; it does not inherit from the Hawkes specification.
+
+## Start here
+
+- [Get started](https://ksublee.github.io/frpp/articles/get-started.md):
+  installation, a first model and simulation.
+- [Examples](https://ksublee.github.io/frpp/articles/frpp-examples.md):
+  one- and two-dimensional models migrated from emhawkes.
+- [Fitting and
+  inference](https://ksublee.github.io/frpp/articles/fitting-and-inference.md):
+  optimizers, identification, diagnostics and restoration.
+- [Model and
+  computation](https://ksublee.github.io/frpp/articles/model-and-computation.md):
+  residual refresh rules, kernel mapping and the emhawkes boundary.
+- [Function
+  reference](https://ksublee.github.io/frpp/reference/index.md):
+  arguments and return values.
+
+## Main functions
+
+| Task | Function |
+|----|----|
+| Specify a residual law | [`residual_law()`](https://ksublee.github.io/frpp/reference/residual_law.md) |
+| Compose a model | [`fspec()`](https://ksublee.github.io/frpp/reference/frpp_spec.md) |
+| Simulate a path | [`fsim()`](https://ksublee.github.io/frpp/reference/operations.md) or [`stats::simulate()`](https://rdrr.io/r/stats/simulate.html) |
+| Evaluate the likelihood | [`logLik()`](https://ksublee.github.io/frpp/reference/operations.md) |
+| Fit parameters | [`ffit()`](https://ksublee.github.io/frpp/reference/ffit.md) |
+| Inspect a fit | [`summary()`](https://rdrr.io/r/base/summary.html), [`coef()`](https://rdrr.io/r/stats/coef.html), [`vcov()`](https://rdrr.io/r/stats/vcov.html), [`fdiagnostics()`](https://ksublee.github.io/frpp/reference/ffit.md) |
+| Restore a fitted model | [`fitted_fspec()`](https://ksublee.github.io/frpp/reference/ffit.md) and [`finitial_state()`](https://ksublee.github.io/frpp/reference/ffit.md) |
+
+Simulation redraws every dimension’s candidate residual after every
+event in the combined process. This is a model rule, not an independent
+renewal clock for each dimension.
+
+## Current implementation
+
+The default likelihood backend and simulator use public emhawkes
+interfaces. The experimental `state` backend assembles the FRPP
+likelihood from a shared kernel replay API. That API is not yet included
+in the published emhawkes sources; examples detect whether it is
+installed and label unavailable comparisons.
+
+Residual parameters remain fixed during fitting unless joint estimation
+is requested. A successful optimizer or a positive covariance matrix
+does not establish valid confidence-interval coverage. The guides
+explain these limits.

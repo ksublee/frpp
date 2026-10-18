@@ -1,0 +1,118 @@
+# Model and computation
+
+## Composition and dependency direction
+
+An `fspec` contains two components:
+
+- `kernel`: an emhawkes `hspec`, without a residual law.
+- `residual`: a
+  [`residual_law()`](https://ksublee.github.io/frpp/reference/residual_law.md)
+  object.
+
+The dependency is `frpp -> emhawkes`. The FRPP object does not inherit
+from `hspec`, so Hawkes methods are not silently applied to it. The
+compatibility adapter
+[`as_legacy_hspec()`](https://ksublee.github.io/frpp/reference/frpp_spec.md)
+temporarily restores the older FRPP representation.
+
+## Exponential state and event mapping
+
+For event type $`i`$, the numeric driver is
+``` math
+v_i(t) = \mu_i + \sum_{j=1}^K C_{ij}(t).
+```
+Between events, each component decays exponentially. In the currently
+supported FRPP simulation interface, the decay rates are equal within
+each row.
+
+An event’s type identifies a **row** of the driver. Its `type_col_map`
+entry selects the **columns** updated after the event. Entries can
+contain several columns and can overlap across event types. With numeric
+marked effects, a selected component receives
+``` math
+\alpha_{ij} + \eta_{ij}(m-1).
+```
+Rows are event types; columns are kernels. They need not have the same
+count.
+
+The state layer can represent signed components without clipping them.
+Simulation still requires a valid nonnegative driver and arrival
+calculation; a valid component shape alone does not establish simulation
+support.
+
+## The residual refresh rule
+
+After every event in the combined process, the simulator draws a
+candidate residual for every dimension, inverts each integrated driver
+and selects the earliest event. All candidates are refreshed at the next
+global event.
+
+This is **not** a model where a dimension keeps its own residual clock
+until that dimension fires. Carrying candidates across other dimensions’
+events would change the model for a general residual law.
+
+For an inter-event interval, let
+``` math
+A_i = \int v_i(t)\,dt.
+```
+If type $`j`$ fires, the log-likelihood contribution is
+``` math
+\log v_j + \log f(A_j) + \sum_{i\ne j}\log S(A_i),
+```
+where $`f`$ and $`S`$ are the residual density and survival function.
+Unit-exponential residuals reduce this expression to a Hawkes
+contribution.
+
+For other laws, the driver is not automatically the conditional
+intensity: the residual hazard also matters. The current observation API
+ends at the last recorded event; it does not add a separate terminal
+observation interval.
+
+## Computation backends
+
+| Operation | Current implementation |
+|----|----|
+| Simulation | [`fsim()`](https://ksublee.github.io/frpp/reference/operations.md) uses the existing public emhawkes FRPP event loop |
+| Default likelihood, `bridge` | Uses emhawkes’s existing FRPP likelihood |
+| Experimental likelihood, `state` | Uses public kernel replay, then assembles FRPP density and survival contributions |
+| Estimation | [`ffit()`](https://ksublee.github.io/frpp/reference/ffit.md) supplies an FRPP objective to public emhawkes parameter mapping, optimization and reconstruction |
+
+The `state` backend requires numeric baseline and kernel parameters,
+equal decay rates within a row, and no impact or mark-density callbacks.
+Numeric `eta`, observed marks and kernel mappings are supported. It
+requires the unreleased shared-kernel API and reports an explicit error
+when that API is absent.
+
+Replay supplies kernel-only interval integrals, pre-event sums and a
+final component state. FRPP adds the baseline contribution. Full
+component histories are requested only for `infer = TRUE`; interval
+integrals and sums still require storage proportional to observations
+times event types.
+
+The default `bridge` remains available for callback models. The existing
+`emhawkes.engine` option retains its Hawkes likelihood meaning; it does
+not select a native FRPP likelihood.
+
+## Initialization and inference boundaries
+
+FRPP automatic initialization uses zero components and recommends an
+explicit state. A Hawkes unconditional mean is not assumed for arbitrary
+residual laws.
+
+The shared state calculation does not establish stationarity,
+identification or confidence-interval coverage. FRPP fitting uses its
+own likelihood and optimizer curvature; Hawkes-specific Hessian
+stabilization is not applied.
+
+The old
+[`frpp_spec()`](https://ksublee.github.io/frpp/reference/frpp_spec.md)
+constructor and serialized class remain compatible.
+[`as_fspec()`](https://ksublee.github.io/frpp/reference/frpp_spec.md)
+converts an older FRPP `hspec`. Callback functions keep their
+environments and default bindings during conversion.
+
+## Next development steps
+
+Independent FRPP simulation and estimation reconstruction remain future
+work. The current public replay API is a first shared calculation
+boundary, not a complete separation of the two packages’ engines.
