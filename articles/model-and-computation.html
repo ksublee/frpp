@@ -32,11 +32,18 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../articles/get-started.html">Get started</a></li>
-<li class="nav-item"><a class="nav-link" href="../articles/frpp-examples.html">Examples</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-examples" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Examples</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-examples">
+<li><a class="dropdown-item" href="../articles/frpp-examples.html">FRPP interface</a></li>
+    <li><a class="dropdown-item" href="../articles/emhawkes-compatibility.html">Legacy emhawkes examples</a></li>
+  </ul>
+</li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-guides" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Guides</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-guides">
 <li><a class="dropdown-item" href="../articles/fitting-and-inference.html">Fitting and inference</a></li>
+    <li><a class="dropdown-item" href="../articles/legacy-fit-validation.html">10,000-row fit validation</a></li>
     <li><a class="dropdown-item" href="../articles/model-and-computation.html">Model and computation</a></li>
   </ul>
 </li>
@@ -209,6 +216,18 @@ stabilization is not applied.</p>
 remain compatible. <code><a href="../reference/frpp_spec.html">as_fspec()</a></code> converts an older FRPP
 <code>hspec</code>. Callback functions keep their environments and
 default bindings during conversion.</p>
+</div>
+<div class="section level2">
+<h2 id="migration-from-emhawkes">Migration from emhawkes<a class="anchor" aria-label="anchor" href="#migration-from-emhawkes"></a>
+</h2>
+<p>FRPP-specific functionality is planned to move to frpp. The <a href="frpp-examples.html">FRPP examples</a> use the new interface; the
+<a href="emhawkes-compatibility.html">legacy vignette</a> preserves the
+full original emhawkes examples, including fitting and
+reconstruction.</p>
+<p>Simple custom-residual models remain available in emhawkes during the
+transition. No existing residual-law function or slot is removed by this
+documentation move. Hawkes goodness-of-fit residual diagnostics remain
+in emhawkes.</p>
 </div>
 <div class="section level2">
 <h2 id="next-development-steps">Next development steps<a class="anchor" aria-label="anchor" href="#next-development-steps"></a>

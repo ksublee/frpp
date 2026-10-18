@@ -32,11 +32,18 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../articles/get-started.html">Get started</a></li>
-<li class="nav-item"><a class="nav-link" href="../articles/frpp-examples.html">Examples</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-examples" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Examples</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-examples">
+<li><a class="dropdown-item" href="../articles/frpp-examples.html">FRPP interface</a></li>
+    <li><a class="dropdown-item" href="../articles/emhawkes-compatibility.html">Legacy emhawkes examples</a></li>
+  </ul>
+</li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-guides" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Guides</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-guides">
 <li><a class="dropdown-item" href="../articles/fitting-and-inference.html">Fitting and inference</a></li>
+    <li><a class="dropdown-item" href="../articles/legacy-fit-validation.html">10,000-row fit validation</a></li>
     <li><a class="dropdown-item" href="../articles/model-and-computation.html">Model and computation</a></li>
   </ul>
 </li>
@@ -221,6 +228,14 @@ path requires its terminal state.</p>
 <code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS()</a></code>. Captured callback environments remain references
 to external state; saving a fit does not automatically freeze that
 external state.</p>
+</div>
+<div class="section level2">
+<h2 id="validation-of-the-migrated-example">Validation of the migrated example<a class="anchor" aria-label="anchor" href="#validation-of-the-migrated-example"></a>
+</h2>
+<p>See the <a href="legacy-fit-validation.html">10,000-row
+comparison</a> for matching <code>hfit()</code> and <code><a href="../reference/ffit.html">ffit()</a></code>
+estimates, saved-fit replay and the unavailable Wald covariance in the
+trapezoid-exponential example.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

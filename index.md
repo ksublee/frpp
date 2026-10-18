@@ -14,9 +14,15 @@ residual law; it does not inherit from the Hawkes specification.
   installation, a first model and simulation.
 - [Examples](https://ksublee.github.io/frpp/articles/frpp-examples.md):
   one- and two-dimensional models migrated from emhawkes.
+- [Legacy emhawkes
+  examples](https://ksublee.github.io/frpp/articles/emhawkes-compatibility.md):
+  the complete original FRPP examples and fitting code.
 - [Fitting and
   inference](https://ksublee.github.io/frpp/articles/fitting-and-inference.md):
   optimizers, identification, diagnostics and restoration.
+- [10,000-row fit
+  validation](https://ksublee.github.io/frpp/articles/legacy-fit-validation.md):
+  matched original and migrated estimates, curvature and elapsed times.
 - [Model and
   computation](https://ksublee.github.io/frpp/articles/model-and-computation.md):
   residual refresh rules, kernel mapping and the emhawkes boundary.

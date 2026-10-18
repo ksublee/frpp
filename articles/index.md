@@ -10,6 +10,8 @@
 
 - [FRPP examples migrated from
   emhawkes](https://ksublee.github.io/frpp/articles/frpp-examples.md):
+- [Legacy emhawkes FRPP
+  examples](https://ksublee.github.io/frpp/articles/emhawkes-compatibility.md):
 
 ### Guides
 
@@ -24,3 +26,8 @@
 
   Understand the driver, residual refresh rule and shared-kernel
   boundary.
+
+- [10,000-row fit
+  validation](https://ksublee.github.io/frpp/articles/legacy-fit-validation.md):
+
+  Compare original emhawkes fitting with ffit under matching conditions.

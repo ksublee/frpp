@@ -16,10 +16,15 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/get-started.html">Get started</a></li>
-<li class="nav-item"><a class="nav-link" href="../articles/frpp-examples.html">Examples</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-examples" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Examples</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-examples"><li><a class="dropdown-item" href="../articles/frpp-examples.html">FRPP interface</a></li>
+    <li><a class="dropdown-item" href="../articles/emhawkes-compatibility.html">Legacy emhawkes examples</a></li>
+  </ul></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-guides" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Guides</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-guides"><li><a class="dropdown-item" href="../articles/fitting-and-inference.html">Fitting and inference</a></li>
+    <li><a class="dropdown-item" href="../articles/legacy-fit-validation.html">10,000-row fit validation</a></li>
     <li><a class="dropdown-item" href="../articles/model-and-computation.html">Model and computation</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -41,7 +46,9 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9000" id="frpp-0009000">frpp 0.0.0.9000<a class="anchor" aria-label="anchor" href="#frpp-0009000"></a></h2>
-<ul><li><p>Add <code><a href="../reference/operations.html">fsim()</a></code> as the primary simulation function. Existing <code><a href="https://rdrr.io/r/stats/simulate.html" class="external-link">simulate()</a></code> methods call it, preserving path and RNG behavior and old serialized classes.</p></li>
+<ul><li><p>Verify the 10,000-row migrated fit against the original emhawkes interface in three paired repetitions; document exact estimates and optimizer curvature, restored likelihoods, unavailable Wald covariance and elapsed fitting times.</p></li>
+<li><p>Preserve the full original emhawkes FRPP examples in a compatibility vignette, alongside the new-interface examples. Document the planned migration while retaining simple residual-law uses and Hawkes residual diagnostics in emhawkes.</p></li>
+<li><p>Add <code><a href="../reference/operations.html">fsim()</a></code> as the primary simulation function. Existing <code><a href="https://rdrr.io/r/stats/simulate.html" class="external-link">simulate()</a></code> methods call it, preserving path and RNG behavior and old serialized classes.</p></li>
 <li><p>Assemble numeric state-backend likelihoods using the experimental public <code>emhawkes::exp_kernel_replay()</code> interface, without Hawkes likelihood evaluation or full component histories when inference is not requested. This requires the emhawkes development interface; the bridge remains available with 1.0.0.</p></li>
 <li><p>Use <code><a href="../reference/frpp_spec.html">fspec()</a></code> as the primary composition constructor. Keep <code><a href="../reference/frpp_spec.html">frpp_spec()</a></code> and old serialized classes compatible; add <code><a href="../reference/frpp_spec.html">as_fspec()</a></code>.</p></li>
 <li><p>Add <code><a href="../reference/ffit.html">ffit()</a></code> with maxLik and stats optimizers, optional joint residual estimation, shared/fixed parameters, constraints and a domain validator.</p></li>

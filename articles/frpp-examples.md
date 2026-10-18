@@ -2,10 +2,16 @@
 
 These three examples come from the flexible-residual section of
 `emhawkes`’s Extended examples. Kernel parameters and output sizes are
-unchanged. Each simulation uses seed 1107 explicitly; the original
-one-dimensional and uniform examples inherited their random state from
-earlier examples. `size` includes the initial row. The initial component
-state is explicitly zero.
+unchanged. The complete original emhawkes code, including its custom
+fitting objective, is preserved in [Legacy emhawkes FRPP
+examples](https://ksublee.github.io/frpp/articles/emhawkes-compatibility.md).
+FRPP-specific functionality is planned to move here; simple residual-law
+models remain supported by emhawkes during the transition.
+
+Each simulation uses seed 1107 explicitly; the original one-dimensional
+and uniform examples inherited their random state from earlier examples.
+`size` includes the initial row. The initial component state is
+explicitly zero.
 
 The model contains a kernel and a residual law. The current simulation
 and default `bridge` likelihood reuse public emhawkes functions. The
@@ -191,6 +197,11 @@ example explicitly estimates them jointly. The same six shared
 parameters, initial state and constraints as the original example are
 used. No automatic scale normalization or Hawkes Hessian stabilization
 is applied.
+
+A [matched 10,000-row
+validation](https://ksublee.github.io/frpp/articles/legacy-fit-validation.html)
+records the estimates, restoration, curvature diagnostics and elapsed
+times under explicitly matched optimizer controls.
 
 The long fit is opt-in. Set `FRPP_RUN_LONG_EXAMPLES=true` before
 rendering this vignette to execute it; simulation and likelihood

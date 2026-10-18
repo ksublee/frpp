@@ -30,11 +30,18 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../articles/get-started.html">Get started</a></li>
-<li class="active nav-item"><a class="nav-link" href="../articles/frpp-examples.html">Examples</a></li>
+<li class="active nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-examples" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Examples</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-examples">
+<li><a class="dropdown-item" href="../articles/frpp-examples.html">FRPP interface</a></li>
+    <li><a class="dropdown-item" href="../articles/emhawkes-compatibility.html">Legacy emhawkes examples</a></li>
+  </ul>
+</li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-guides" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Guides</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-guides">
 <li><a class="dropdown-item" href="../articles/fitting-and-inference.html">Fitting and inference</a></li>
+    <li><a class="dropdown-item" href="../articles/legacy-fit-validation.html">10,000-row fit validation</a></li>
     <li><a class="dropdown-item" href="../articles/model-and-computation.html">Model and computation</a></li>
   </ul>
 </li>
@@ -70,10 +77,14 @@
     
 <p>These three examples come from the flexible-residual section of
 <code>emhawkes</code>’s Extended examples. Kernel parameters and output
-sizes are unchanged. Each simulation uses seed 1107 explicitly; the
-original one-dimensional and uniform examples inherited their random
-state from earlier examples. <code>size</code> includes the initial row.
-The initial component state is explicitly zero.</p>
+sizes are unchanged. The complete original emhawkes code, including its
+custom fitting objective, is preserved in <a href="emhawkes-compatibility.html">Legacy emhawkes FRPP examples</a>.
+FRPP-specific functionality is planned to move here; simple residual-law
+models remain supported by emhawkes during the transition.</p>
+<p>Each simulation uses seed 1107 explicitly; the original
+one-dimensional and uniform examples inherited their random state from
+earlier examples. <code>size</code> includes the initial row. The
+initial component state is explicitly zero.</p>
 <p>The model contains a kernel and a residual law. The current
 simulation and default <code>bridge</code> likelihood reuse public
 emhawkes functions. The <code>state</code> backend assembles the FRPP
@@ -236,6 +247,10 @@ parameters stay fixed by default; this example explicitly estimates them
 jointly. The same six shared parameters, initial state and constraints
 as the original example are used. No automatic scale normalization or
 Hawkes Hessian stabilization is applied.</p>
+<p>A <a href="https://ksublee.github.io/frpp/articles/legacy-fit-validation.html">matched
+10,000-row validation</a> records the estimates, restoration, curvature
+diagnostics and elapsed times under explicitly matched optimizer
+controls.</p>
 <p>The long fit is opt-in. Set <code>FRPP_RUN_LONG_EXAMPLES=true</code>
 before rendering this vignette to execute it; simulation and likelihood
 examples always run.</p>

@@ -159,3 +159,12 @@ Save results with [`saveRDS()`](https://rdrr.io/r/base/readRDS.html) and
 restore them with [`readRDS()`](https://rdrr.io/r/base/readRDS.html).
 Captured callback environments remain references to external state;
 saving a fit does not automatically freeze that external state.
+
+## Validation of the migrated example
+
+See the [10,000-row
+comparison](https://ksublee.github.io/frpp/articles/legacy-fit-validation.md)
+for matching `hfit()` and
+[`ffit()`](https://ksublee.github.io/frpp/reference/ffit.md) estimates,
+saved-fit replay and the unavailable Wald covariance in the
+trapezoid-exponential example.

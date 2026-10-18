@@ -111,6 +111,20 @@ constructor and serialized class remain compatible.
 converts an older FRPP `hspec`. Callback functions keep their
 environments and default bindings during conversion.
 
+## Migration from emhawkes
+
+FRPP-specific functionality is planned to move to frpp. The [FRPP
+examples](https://ksublee.github.io/frpp/articles/frpp-examples.md) use
+the new interface; the [legacy
+vignette](https://ksublee.github.io/frpp/articles/emhawkes-compatibility.md)
+preserves the full original emhawkes examples, including fitting and
+reconstruction.
+
+Simple custom-residual models remain available in emhawkes during the
+transition. No existing residual-law function or slot is removed by this
+documentation move. Hawkes goodness-of-fit residual diagnostics remain
+in emhawkes.
+
 ## Next development steps
 
 Independent FRPP simulation and estimation reconstruction remain future

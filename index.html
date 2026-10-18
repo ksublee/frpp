@@ -32,11 +32,18 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="articles/get-started.html">Get started</a></li>
-<li class="nav-item"><a class="nav-link" href="articles/frpp-examples.html">Examples</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-examples" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Examples</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-examples">
+<li><a class="dropdown-item" href="articles/frpp-examples.html">FRPP interface</a></li>
+    <li><a class="dropdown-item" href="articles/emhawkes-compatibility.html">Legacy emhawkes examples</a></li>
+  </ul>
+</li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-guides" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Guides</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-guides">
 <li><a class="dropdown-item" href="articles/fitting-and-inference.html">Fitting and inference</a></li>
+    <li><a class="dropdown-item" href="articles/legacy-fit-validation.html">10,000-row fit validation</a></li>
     <li><a class="dropdown-item" href="articles/model-and-computation.html">Model and computation</a></li>
   </ul>
 </li>
@@ -69,7 +76,11 @@
 <li>
 <a href="articles/frpp-examples.html">Examples</a>: one- and two-dimensional models migrated from emhawkes.</li>
 <li>
+<a href="articles/emhawkes-compatibility.html">Legacy emhawkes examples</a>: the complete original FRPP examples and fitting code.</li>
+<li>
 <a href="articles/fitting-and-inference.html">Fitting and inference</a>: optimizers, identification, diagnostics and restoration.</li>
+<li>
+<a href="articles/legacy-fit-validation.html">10,000-row fit validation</a>: matched original and migrated estimates, curvature and elapsed times.</li>
 <li>
 <a href="articles/model-and-computation.html">Model and computation</a>: residual refresh rules, kernel mapping and the emhawkes boundary.</li>
 <li>

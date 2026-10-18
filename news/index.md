@@ -2,6 +2,16 @@
 
 ## frpp 0.0.0.9000
 
+- Verify the 10,000-row migrated fit against the original emhawkes
+  interface in three paired repetitions; document exact estimates and
+  optimizer curvature, restored likelihoods, unavailable Wald covariance
+  and elapsed fitting times.
+
+- Preserve the full original emhawkes FRPP examples in a compatibility
+  vignette, alongside the new-interface examples. Document the planned
+  migration while retaining simple residual-law uses and Hawkes residual
+  diagnostics in emhawkes.
+
 - Add [`fsim()`](https://ksublee.github.io/frpp/reference/operations.md)
   as the primary simulation function. Existing
   [`simulate()`](https://rdrr.io/r/stats/simulate.html) methods call it,

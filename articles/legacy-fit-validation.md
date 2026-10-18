@@ -1,0 +1,110 @@
+# 10,000-row fit validation
+
+## Scope
+
+On 2026-10-18, the two-dimensional trapezoid-exponential example was
+fitted through both
+[`emhawkes::hfit()`](https://ksublee.github.io/emhawkes/reference/hfit.html)
+and [`frpp::ffit()`](https://ksublee.github.io/frpp/reference/ffit.md).
+This checks compatibility of the existing bridge, rather than a new
+independent estimation engine.
+
+Both simulations used seed 1107 and produced exactly the same data and
+final RNG state: 10,000 rows including the initial row, or 9,999 events.
+Initial components were zero. The six shared parameters were `mu1`,
+`alpha1.1`, `alpha1.2`, `beta1.1`, `a` and `ell`; residual parameters
+were estimated jointly. Both fits used the same density-domain
+validator, nonnegative constraints, `a <= 3`, maxLik BFGS and
+`control = list(iterlim = 1000, reltol = 1e-8)`.
+
+The environment was Windows, R 4.5.1, emhawkes 1.0.1 and maxLik 1.5-2.1.
+The fitting comparison used emhawkes without the unreleased
+shared-kernel API.
+
+## Results
+
+Across three paired repetitions, coefficients, reported log likelihoods,
+initial-state arguments and the underlying optimizer Hessians matched
+exactly. Both interfaces returned optimizer code 0. Fitting did not
+consume RNG state. The reported log likelihood was
+**-12411.1075525012**. Restored models reproduced it with zero
+difference.
+
+| Shared parameter | Estimate, identical in both interfaces |
+|------------------|---------------------------------------:|
+| `mu1`            |                           0.3037481375 |
+| `alpha1.1`       |                           0.5422426583 |
+| `alpha1.2`       |                           0.8534686090 |
+| `beta1.1`        |                           1.5996890464 |
+| `a`              |                           0.7243553975 |
+| `ell`            |                           1.6487607808 |
+
+A separate fresh-session check reloaded all six fits and compared their
+restored bridge inference with the experimental shared-kernel backend.
+The maximum absolute log-likelihood difference was 1.13e-10; full
+inference outputs passed the existing relative comparison tolerance of
+`1e-10`. This additional check requires the emhawkes development API.
+
+Using the same precomputed interval values, the bridge’s separate
+accumulated sums and the state’s event-wise accumulated sum exactly
+reproduced their respective likelihoods. Summation order alone explains
+the entire difference; no state value or comparison tolerance was
+changed. The optional replay script also checks and records this
+calculation.
+
+## Standard errors
+
+The shared optimizer Hessian was indefinite: the minimum eigenvalue of
+its negative was -9402.647211. The stored maximum absolute score was
+5.672282; optimizer code 0 alone does not establish a well-resolved
+optimum.
+
+The original provider produced nonfinite standard errors for `a` and
+`ell`. [`ffit()`](https://ksublee.github.io/frpp/reference/ffit.md)
+reported `wald = "unavailable"` and `reason = "nonpositive_curvature"`,
+withholding the full free-parameter Wald covariance. The raw Hessian
+matched the original calculation; it was not repaired or replaced.
+Finite errors for the other four parameters in the original output do
+not validate an indefinite information matrix.
+
+These checks establish matching estimation behavior on this dataset.
+They do not prove a global optimum or confidence-interval coverage.
+FRPP-specific profile likelihood and bootstrap inference remain separate
+work.
+
+## Elapsed fitting time
+
+The two interfaces were warmed up, then timed sequentially in
+alternating order: hfit/ffit, ffit/hfit, hfit/ffit. Package loading,
+simulation, likelihood warm-up and post-fit replay were excluded. No
+package builds or checks ran alongside these measurements. Times include
+each public fitting call and its result construction. These are three
+repetitions on one dataset, not a speed claim for other FRPP models.
+
+| Interface | Median seconds | Range, seconds |
+|-----------|---------------:|---------------:|
+| hfit      |         332.01 |  331.81–334.19 |
+| ffit      |         340.95 |  336.81–341.84 |
+
+## Reproduce
+
+From the frpp repository with both packages installed:
+
+``` sh
+Rscript tools/validate-legacy-fit.R results/legacy-fit 3
+```
+
+With the emhawkes development shared-kernel API installed, also run:
+
+``` sh
+Rscript tools/replay-fit-validation.R results/legacy-fit
+```
+
+The script saves inputs, fits, coefficients, convergence and curvature
+summaries, comparisons, elapsed times and session information. It stops
+on a comparison failure; it does not widen the fixed tolerance. The
+[FRPP
+examples](https://ksublee.github.io/frpp/articles/frpp-examples.md) show
+the new interface, and the [legacy
+vignette](https://ksublee.github.io/frpp/articles/emhawkes-compatibility.md)
+retains the original code.
