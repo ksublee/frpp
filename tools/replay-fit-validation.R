@@ -14,7 +14,7 @@ rows <- lapply(names(results),function(name) {
  fit <- results[[name]]
  model <- if (inherits(fit,"ffit")) fitted_fspec(fit) else emhawkes::fitted_hspec(fit)
  initial <- if (inherits(fit,"ffit")) finitial_state(fit) else emhawkes::fit_initial_state(fit)
- if (!inherits(model,"frpp_spec")) model <- as_fspec(model)
+ model <- as_fspec(model)
  bridge <- do.call(stats::logLik,c(list(object=model,inter_arrival=x$path$inter_arrival,
    type=x$path$type,infer=TRUE),initial))
  state <- do.call(stats::logLik,c(list(object=model,inter_arrival=x$path$inter_arrival,

@@ -2,7 +2,7 @@
 # Keep the bridge for callback models and installations without that API.
 state_loglik <- function(object, inter_arrival, type, mark, N, Nc, N0, Nc0,
                          initial, infer, ...) {
-  kernel <- object$kernel
+  kernel <- object@kernel
   values <- list(kernel@mu, kernel@alpha, kernel@beta, kernel@eta)
   if (any(vapply(values, function(x) !is.null(x) &&
     (!is.numeric(x) || is.object(x)), logical(1))) ||

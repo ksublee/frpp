@@ -24,7 +24,7 @@ comparisons <- 0L
 maximum_likelihood_difference <- 0
 for (kernel in kernels) for (law in laws) {
   model <- frpp_spec(kernel, law)
-  stopifnot(!methods::is(model, "hspec"), inherits(model, "frpp_spec"),
+  stopifnot(!methods::is(model, "hspec"), methods::is(model, "fspec"),
     identical(model$kernel, kernel))
   legacy <- as_legacy_hspec(model)
   converted <- as_frpp(legacy)

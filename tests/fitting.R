@@ -10,7 +10,8 @@ fails <- function(expr, text) {
 law <- residual_law(c(rate = 1), stats::dexp, stats::pexp, stats::qexp, stats::rexp)
 model <- fspec(methods::new("hspec", mu = 1, alpha = 0, beta = 1), law)
 stopifnot(inherits(model, "fspec"), !methods::is(model, "hspec"))
-legacy_class <- model; class(legacy_class) <- "frpp_spec"
+legacy_class <- structure(list(kernel = fkernel(model), residual = fresidual(model),
+  refresh = model$refresh, version = 1L), class = "frpp_spec")
 stopifnot(inherits(as_fspec(legacy_class), "fspec"))
 stopifnot(identical(logLik(model, c(0, .2)), logLik(legacy_class, c(0, .2))))
 dt <- c(0, .2, .3, .5)

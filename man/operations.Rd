@@ -4,6 +4,8 @@
 \alias{logLik.frpp_spec}
 \alias{simulate.fspec}
 \alias{logLik.fspec}
+\alias{simulate,fspec-method}
+\alias{logLik,fspec-method}
 \alias{print.frpp_path}
 \title{Simulate and Evaluate the Composition Prototype}
 \description{Use a compatibility bridge, or assemble a numeric FRPP likelihood

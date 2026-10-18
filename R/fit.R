@@ -21,7 +21,7 @@ ffit <- function(object, inter_arrival, type = NULL, mark = NULL,
                  backend = c("bridge", "state"), reduced = TRUE,
                  fixed = NULL, constraints = NULL, constraint = NULL,
                  valid = NULL, ...) {
-  if (!inherits(object, "frpp_spec")) stop("object must be an fspec.", call. = FALSE)
+  if (!is_fspec(object)) stop("object must be an fspec.", call. = FALSE)
   object <- as_fspec(object)
   if (!is.logical(estimate_residual) || length(estimate_residual) != 1L || is.na(estimate_residual))
     stop("estimate_residual must be TRUE or FALSE.", call. = FALSE)
@@ -47,7 +47,7 @@ ffit <- function(object, inter_arrival, type = NULL, mark = NULL,
   legacy <- if (estimate_residual) as_legacy_hspec(object) else fixed_residual_spec(object)
   # A user validator receives fitted names, plus fixed raw residual parameters.
   # FALSE rejects a numerical proposal; errors are not swallowed.
-  residual_parameters <- if (object$residual$binding == "raw") object$residual$param else numeric()
+  residual_parameters <- if (object@residual$binding == "raw") object@residual$param else numeric()
   objective <- function(object, inter_arrival, type, mark, N, Nc, N0, Nc0,
                         lambda_component0, param) {
     if (!is.null(valid)) {
@@ -71,14 +71,14 @@ ffit <- function(object, inter_arrival, type = NULL, mark = NULL,
   if (is.null(fit)) stop("The optimizer did not return a fit.", call. = FALSE)
   estimate <- stats::coef(fit)
   restored <- as_fspec(emhawkes::fitted_hspec(fit))
-  if (object$residual$binding == "raw") {
-    law <- object$residual
+  if (object@residual$binding == "raw") {
+    law <- object@residual
     if (estimate_residual) {
       shared <- intersect(names(law$param), names(estimate))
       law$param[shared] <- estimate[shared]
     }
-    restored <- fspec(restored$kernel, law)
-  } else if (!estimate_residual) restored <- fspec(restored$kernel, object$residual)
+    restored <- fspec(restored@kernel, law)
+  } else if (!estimate_residual) restored <- fspec(restored@kernel, object@residual)
   active <- if (optimizer == "stats") fit$active else maxLik::activePar(fit)
   code <- if (optimizer == "stats") fit$code else maxLik::returnCode(fit)
   message <- if (optimizer == "stats") fit$message else maxLik::returnMessage(fit)
@@ -126,7 +126,7 @@ ffit <- function(object, inter_arrival, type = NULL, mark = NULL,
 
 fitted_fspec <- function(object) {
   if (!inherits(object, "ffit")) stop("object must be an ffit result.", call. = FALSE)
-  object$model
+  as_fspec(object$model)
 }
 fdiagnostics <- function(object) {
   if (!inherits(object, "ffit")) stop("object must be an ffit result.", call. = FALSE)

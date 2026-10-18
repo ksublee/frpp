@@ -2,7 +2,8 @@ library(frpp)
 model <- fspec(methods::new("hspec", mu = .4, alpha = .1, beta = 1),
   residual_law(c(shape = 2, rate = 2), stats::dgamma, stats::pgamma,
                stats::qgamma, stats::rgamma))
-old <- model; class(old) <- "frpp_spec"
+old <- structure(list(kernel = fkernel(model), residual = fresidual(model),
+  refresh = model$refresh, version = 1L), class = "frpp_spec")
 for (object in list(model, old)) for (size in c(1L, 20L)) {
   set.seed(18)
   seed <- .Random.seed

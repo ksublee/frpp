@@ -46,6 +46,7 @@ reference:
 - title: Model specification
   contents:
   - frpp_spec
+  - fkernel
   - residual_law
 - title: Simulation and likelihood
   contents:

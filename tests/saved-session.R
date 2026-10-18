@@ -10,7 +10,11 @@ check_saved_session <- function() {
   converted <- as_frpp(as_legacy_hspec(m))
   x <- stats::simulate(m, size = 10, seed = 217, lambda_component0 = .1)
   expected <- stats::logLik(m, x$inter_arrival, x$type, lambda_component0 = .1)
-  saveRDS(list(raw = m, converted = converted, path = x, value = expected), saved)
+  old <- structure(list(kernel = fkernel(m), residual = fresidual(m),
+    refresh = m$refresh, version = 1L), class = "frpp_spec")
+  old_named <- old; class(old_named) <- c("fspec", "frpp_spec")
+  saveRDS(list(raw = m, converted = converted, old = old, old_named = old_named,
+    path = x, value = expected), saved)
   saveRDS(.libPaths(), libraries)
   writeLines(c(
     "args <- commandArgs(TRUE)",
@@ -18,7 +22,8 @@ check_saved_session <- function() {
     "library(frpp)",
     "stopifnot(!('package:methods' %in% search()), !('package:emhawkes' %in% search()))",
     "x <- readRDS(args[2])",
-    "for (m in list(x$raw, x$converted)) {",
+    "for (m in list(x$raw, x$converted, x$old, x$old_named)) {",
+    "  stopifnot(isS4(as_fspec(m)), methods::validObject(as_fspec(m)))",
     "  for (backend in c('bridge', 'state')) {",
     "    value <- stats::logLik(m, x$path$inter_arrival, x$path$type,",
     "      lambda_component0 = .1, backend = backend)",
