@@ -12,8 +12,8 @@
 \alias{print.ffit}
 \alias{print.summary.ffit}
 \title{Fit a Flexible Residual Point Process}
-\description{Estimate a composition model using an FRPP likelihood. Reuses the
-public emhawkes parameter map and optimizer adapters and restores an fspec.}
+\description{Estimate a composition model using an FRPP likelihood. Choose the
+compatibility bridge or independent numeric parameter and optimizer execution.}
 \usage{
 ffit(object, inter_arrival, type = NULL, mark = NULL,
      N = NULL, Nc = NULL, N0 = NULL, Nc0 = NULL,
@@ -21,7 +21,7 @@ ffit(object, inter_arrival, type = NULL, mark = NULL,
      optimizer = c("maxLik", "stats"), method = "BFGS",
      backend = c("bridge", "state"), reduced = TRUE,
      fixed = NULL, constraints = NULL, constraint = NULL,
-     valid = NULL, ...)
+     valid = NULL, ..., fit_backend = c("bridge", "independent", "auto"))
 fitted_fspec(object)
 finitial_state(object)
 fdiagnostics(object)
@@ -36,12 +36,20 @@ including an initial zero row.}
 specify a scalar or conformable matrix when known. Hawkes mean initialization is not used.}
 \item{estimate_residual}{Keep the residual distribution fixed by default.
 Set \code{TRUE} to include its named parameters in the optimization.}
-\item{optimizer}{Optional maxLik provider, or R's stats provider through the public
-emhawkes adapter. The stats provider does not require maxLik.}
+\item{optimizer}{Optional maxLik provider, or R's stats provider.
+The stats provider does not require maxLik.}
 \item{method}{Optimization method, default BFGS. The stats provider also supports
 Nelder-Mead, CG and L-BFGS-B.}
 \item{backend}{FRPP likelihood backend. \code{state} retains the numeric-kernel
 restrictions described in \code{\link{logLik.fspec}}.}
+\item{fit_backend}{Named-only fitting execution choice, independent of
+\code{backend}. The default \code{bridge} uses public \code{emhawkes::hfit}.
+\code{independent} registers numeric kernel and raw residual parameters with
+the public \code{emhawkes::parameter_plan} API and calls maxLik or stats directly.
+It requires that development API and excludes event callbacks and legacy bound
+residual laws. Unsupported requests are errors. \code{auto} selects independent
+fitting when supported and otherwise uses the bridge, before optimization;
+it never retries a failed fit using another route.}
 \item{reduced}{Share entries having equal starting values within each numeric
 kernel matrix. Function parameters sharing a name are shared under either setting.}
 \item{fixed}{Logical mask or parameter positions, passed to the optimizer.
@@ -58,16 +66,21 @@ start for movable inequalities; it does not support equalities.}
 one nonmissing logical value. FALSE rejects a proposal with minus infinity.
 Fixed raw residual parameters are also included. Validator and callback errors
 propagate. Supply distribution-specific domain checks when needed.}
-\item{...}{Named optimizer arguments accepted by the public hfit adapter,
+\item{...}{Named optimizer arguments,
 including \code{control}, \code{grad}, \code{hess}, and stats box bounds.
 For stats use \code{control$maxit}; maxLik uses \code{control$iterlim}.
 FRPP objective, analytic Hawkes gradient and Hawkes final-Hessian selection
 cannot be overridden through these arguments.}
 }
 \details{
-The new fitting API delegates parameter sharing, optimization and kernel
-reconstruction to public emhawkes functions; its objective always evaluates the
-FRPP model. No internal emhawkes functions or Hawkes curvature stabilization are used.
+The bridge delegates fitting execution to public emhawkes functions. Independent
+fitting owns observation preparation, optimization and fitted-model assembly;
+it shares only the public parameter contract and the selected likelihood's
+public kernel/residual APIs. Its stats adapter retains the bridge's fixed/free,
+constraint reduction, finite-difference and covariance rules. Neither route uses
+internal emhawkes functions or Hawkes curvature stabilization.
+The result's \code{fitting} field records requested and used fitting routes and
+an automatic fallback reason. Earlier saved results may lack this field.
 Likelihood evaluation and default BFGS fitting do not generate random values.
 Stochastic optimizers can consume randomness. User callbacks must be deterministic.
 
@@ -86,7 +99,10 @@ Captured callback environments remain references; external state is not frozen.
 
 Wald covariance is withheld on optimizer failure, missing or nonpositive
 curvature, near detected constraint boundaries, and equality constraints.
-The original provider result remains in \code{fit$fit}. A positive covariance is
+The provider result remains in \code{fit$fit}: maxLik retains its class; the
+independent stats result has class \code{frpp_stats_fit}, supporting coef,
+logLik, vcov, summary and print. Bridge stats results retain their existing class.
+A positive covariance is
 reported as \code{available_unvalidated}: numerical step sensitivity, nonsmooth
 densities, weak identification and actual confidence-interval coverage have not
 been validated. A supplied analytic Hessian can avoid finite-difference error

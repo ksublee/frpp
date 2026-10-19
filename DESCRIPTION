@@ -20,4 +20,6 @@ Collate:
     'state-likelihood.R'
     'simulation.R'
     'operations.R'
+    'optimizer.R'
+    'fit-independent.R'
     'fit.R'

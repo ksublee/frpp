@@ -1,5 +1,11 @@
 # frpp 0.0.0.9000
 
+- Add optional independent numeric fitting with `fit_backend = "independent"`.
+  FRPP owns observation preparation and calls maxLik or stats directly, using
+  the public emhawkes parameter contract. Preserve the bridge default and
+  distinguish fitting execution from the likelihood `backend`; `auto` selects
+  support before optimization and records fallback reasons without retrying.
+
 - Register and restore numeric kernels and raw residual parameters through the
   public emhawkes parameter-plan contract. Preserve hfit optimization, parameter
   coordinates, residual freezing and saved results; callback/older-version

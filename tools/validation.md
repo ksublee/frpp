@@ -183,3 +183,13 @@ remain separate from the daily suite. Run at least one matched large pair for
 accuracy; use at least three alternating repetitions when reporting fitting
 performance. An accuracy-only run must omit timing summaries rather than
 aggregate missing elapsed values.
+
+
+## Independent fitting
+
+The ordinary suite discovers independent-fitting.R, including the fixed 65-row
+reference, provider controls, callback/old-dependency fallback, saved sessions
+and mapped numeric kernels. Explicit independent fitting must work without hfit.
+See [the independent-fitting report](independent-fitting-results.md) for exact
+comparisons and the separate 10,000-row actual refit. Keep expensive large refits
+outside the daily suite; an accuracy refit does not constitute a speed benchmark.

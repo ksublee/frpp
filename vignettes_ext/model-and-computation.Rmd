@@ -77,7 +77,8 @@ last recorded event; it does not add a separate terminal observation interval.
 | Optional simulation, `state` | FRPP owns the event loop, using public event-wise kernel calculations |
 | Default likelihood, `bridge` | Uses emhawkes's existing FRPP likelihood |
 | Experimental likelihood, `state` | Uses public kernel replay, then assembles FRPP density and survival contributions |
-| Estimation | `ffit()` supplies an FRPP objective to public emhawkes parameter mapping, optimization and reconstruction |
+| Default estimation, `fit_backend = "bridge"` | `ffit()` supplies an FRPP objective to public emhawkes fitting |
+| Optional independent estimation | FRPP prepares observations, registers parameters through the public plan, runs maxLik or stats directly and reconstructs its model |
 
 The `state` backend requires numeric baseline and kernel parameters, equal
 decay rates within a row, and no impact or mark-density callbacks. Numeric
@@ -183,3 +184,37 @@ The raw optimizer result and saved ffit representation remain available.
 This step separates registration/restoration; optimizer adapters and legacy
 objective preparation remain shared. It makes no new confidence-interval
 coverage or performance claim.
+
+
+## Independent numeric fitting
+
+`fit_backend` selects who runs estimation; `backend` selects the likelihood.
+Both defaults remain `"bridge"`. For example:
+
+```{r}
+model <- fspec(methods::new("hspec", mu = 1, alpha = 0, beta = 1),
+  residual_law(c(rate = 1), stats::dexp, stats::pexp,
+    stats::qexp, stats::rexp))
+fit <- ffit(model, c(0, .2, .3, .5), optimizer = "stats",
+  fixed = c(FALSE, TRUE, TRUE), lambda_component0 = 0,
+  fit_backend = "independent")
+coef(fit)
+fit$fitting
+```
+
+This path supports plain numeric mu/alpha/beta/eta, kernel mappings and raw
+residual laws. It owns observation/count validation, explicit initial states,
+optimizer calls and result assembly. The public parameter plan retains matrix
+sharing, coordinate order and named residual sharing. Fixed/free selectors,
+linear constraints, box bounds, optional derivatives and validator rejection
+follow the existing provider rules. It uses no emhawkes internal functions and
+does not call hfit. The selected likelihood may still use the public bridge.
+
+Callback kernels, event callbacks, legacy bound residual laws and dependencies
+without the parameter API retain bridge fitting. An explicit independent request
+reports unsupported cases; `fit_backend = "auto"` records its selected route and
+fallback reason before optimization. A failed optimization is never retried on
+another path. New results retain the existing ffit accessors. The raw independent
+stats provider result has its own frpp_stats_fit class; maxLik retains its class.
+The saved result's fitting field reports the route, while numerical diagnostics
+retain their existing meaning. Unavailable Wald covariance remains unavailable.
