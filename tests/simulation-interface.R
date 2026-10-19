@@ -1,4 +1,5 @@
 library(frpp)
+source(file.path("helpers", "kernel-api.R"))
 model <- fspec(methods::new("hspec", mu = .4, alpha = .1, beta = 1),
   residual_law(c(shape = 2, rate = 2), stats::dgamma, stats::pgamma,
                stats::qgamma, stats::rgamma))
@@ -50,7 +51,7 @@ N <- matrix(3:6, ncol = 1)
 Nc <- matrix(c(5, 7, 8, 8.5), ncol = 1)
 args <- list(object = model, inter_arrival = dt, type = types, mark = marks,
   N = N, Nc = Nc, N0 = 3, Nc0 = 5, lambda_component0 = 0)
-for (backend in c("bridge", "state")) {
+for (backend in frpp_backends) {
   value <- do.call(stats::logLik, c(args, list(backend = backend)))
   full <- do.call(stats::logLik, c(args, list(backend = backend, infer = TRUE)))
   stopifnot(identical(unname(value), unname(full$loglikelihood)))

@@ -1,4 +1,5 @@
 library(frpp)
+source(file.path("helpers", "kernel-api.R"))
 # An identified small excitation fit; beta and residual shape/scale are fixed.
 kernel <- methods::new("hspec", mu = .4, alpha = .2, beta = 1.2)
 law <- residual_law(c(shape = 2, rate = 2), stats::dgamma, stats::pgamma,
@@ -67,9 +68,11 @@ for (provider in c("stats", if (requireNamespace("maxLik", quietly = TRUE)) "max
   args <- c(list(object = fitted_fspec(b), inter_arrival = dt,
     type = path$type, infer = TRUE), finitial_state(b))
   bridge <- do.call(stats::logLik, args)
-  state <- do.call(stats::logLik, c(args, list(backend = "state")))
-  stopifnot(identical(as.numeric(logLik(b)), unname(bridge$loglikelihood)),
-    isTRUE(all.equal(bridge, state[names(bridge)], tolerance = 1e-10)),
-    identical(rng, .Random.seed))
+  stopifnot(identical(as.numeric(logLik(b)), unname(bridge$loglikelihood)))
+  if (frpp_has_kernel_api) {
+    state <- do.call(stats::logLik, c(args, list(backend = "state")))
+    stopifnot(isTRUE(all.equal(bridge, state[names(bridge)], tolerance = 1e-10)))
+  }
+  stopifnot(identical(rng, .Random.seed))
   cat(provider, ": exact coefficients, likelihood, raw Hessian, covariance, initial state and RNG; replay passed.\n")
 }

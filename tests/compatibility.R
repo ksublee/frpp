@@ -1,4 +1,5 @@
 library(frpp)
+source(file.path("helpers", "kernel-api.R"))
 stopifnot(!("package:emhawkes" %in% search()))
 close <- function(x, y) stopifnot(isTRUE(all.equal(x, y, tolerance = 1e-10)))
 fails <- function(expr, text) {
@@ -46,16 +47,18 @@ for (kernel in kernels) for (law in laws) {
       mark = actual$mark, lambda_component0 = initial, N0 = 3, Nc0 = 7)
     old <- suppressMessages(do.call(emhawkes::logLik, c(list(object = legacy), args)))
     bridge <- suppressMessages(do.call(stats::logLik, c(list(object = model), args)))
-    state <- suppressMessages(do.call(stats::logLik,
-      c(list(object = model, backend = "state"), args)))
     stopifnot(identical(old, bridge))
-    close(state, old)
-    maximum_likelihood_difference <- max(maximum_likelihood_difference, abs(state - old))
+    if (frpp_has_kernel_api) {
+      state <- suppressMessages(do.call(stats::logLik,
+        c(list(object = model, backend = "state"), args)))
+      close(state, old)
+      maximum_likelihood_difference <- max(maximum_likelihood_difference, abs(state - old))
+    }
     comparisons <- comparisons + 1L
   }
 }
 cat(comparisons, "simulation/RNG and likelihood comparisons passed.\n")
-cat("Maximum state-backend likelihood difference:",
+if (frpp_has_kernel_api) cat("Maximum state-backend likelihood difference:",
     format(maximum_likelihood_difference, digits = 17), "\n")
 
 # The default FRPP state must remain zero even when the Hawkes kernel is stable.
@@ -67,7 +70,7 @@ set.seed(97)
 zero <- stats::simulate(model, size = 8, lambda_component0 = 0)
 stopifnot(identical(unclass(automatic), unclass(zero)),
   identical(.Random.seed, automatic_seed))
-for (backend in c("bridge", "state")) {
+for (backend in frpp_backends) {
   auto <- suppressMessages(stats::logLik(model, c(0, .2, .3), backend = backend))
   explicit <- stats::logLik(model, c(0, .2, .3), lambda_component0 = 0, backend = backend)
   stopifnot(identical(auto, explicit))

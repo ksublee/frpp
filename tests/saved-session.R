@@ -1,4 +1,5 @@
 library(frpp)
+source(file.path("helpers", "kernel-api.R"))
 check_saved_session <- function() {
   libraries <- tempfile(fileext = ".rds")
   saved <- tempfile(fileext = ".rds")
@@ -24,7 +25,8 @@ check_saved_session <- function() {
     "x <- readRDS(args[2])",
     "for (m in list(x$raw, x$converted, x$old, x$old_named)) {",
     "  stopifnot(isS4(as_fspec(m)), methods::validObject(as_fspec(m)))",
-    "  for (backend in c('bridge', 'state')) {",
+    "  backends <- c('bridge', if (all(c('as_exp_kernel', 'exp_kernel_replay') %in% getNamespaceExports('emhawkes'))) 'state')",
+    "  for (backend in backends) {",
     "    value <- stats::logLik(m, x$path$inter_arrival, x$path$type,",
     "      lambda_component0 = .1, backend = backend)",
     "    stopifnot(isTRUE(all.equal(value, x$value, tolerance = 1e-10)))",

@@ -1,4 +1,6 @@
 library(frpp)
+source(file.path("helpers", "kernel-api.R"))
+frpp_numeric_backend <- if (frpp_has_kernel_api) "state" else "bridge"
 close <- function(x, y) stopifnot(isTRUE(all.equal(as.numeric(x), as.numeric(y),
                                                   tolerance = 1e-10)))
 
@@ -41,26 +43,32 @@ for (n in 2:length(dt)) {
 model <- frpp_spec(kernel, residual_law(c(shape = 2, rate = 2),
   stats::dgamma, stats::pgamma, stats::qgamma, stats::rgamma))
 maximum_error <- 0
-for (engine in c("r", "cpp")) {
+for (engine in if (frpp_has_kernel_api) c("r", "cpp") else "r") {
   options(emhawkes.engine = engine)
   result <- stats::logLik(model, dt, type, mark, lambda_component0 = initial,
-    infer = TRUE, backend = "state")
-  close(result$integrated_driver, phi)
+    infer = TRUE, backend = frpp_numeric_backend)
+  # The released bridge does not expose per-interval integrated drivers.
+  # Its intensities and likelihood still have independent all-past/quadrature references.
+  if (frpp_has_kernel_api) {
+    close(result$integrated_driver, phi)
+    maximum_error <- max(maximum_error, abs(result$integrated_driver - phi))
+  }
   close(result$lambda, lambda)
   close(result$loglikelihood, expected)
-  maximum_error <- max(maximum_error, abs(result$integrated_driver - phi))
 }
 options(emhawkes.engine = "auto")
 bridge <- stats::logLik(model, dt, type, mark, lambda_component0 = initial, infer = TRUE)
-state <- stats::logLik(model, dt, type, mark, lambda_component0 = initial,
-  infer = TRUE, backend = "state")
-for (name in names(bridge)) close(state[[name]], bridge[[name]])
+if (frpp_has_kernel_api) {
+  state <- stats::logLik(model, dt, type, mark, lambda_component0 = initial,
+    infer = TRUE, backend = "state")
+  for (name in names(bridge)) close(state[[name]], bridge[[name]])
+}
 
 # Exp(1) recovers the Hawkes likelihood under the same explicit initial state.
 exponential <- frpp_spec(kernel, residual_law(c(rate = 1), stats::dexp,
   stats::pexp, stats::qexp, stats::rexp))
 close(stats::logLik(exponential, dt, type, mark, lambda_component0 = initial,
-  backend = "state"), emhawkes::logLik(kernel, dt, type, mark, lambda_component0 = initial))
+  backend = frpp_numeric_backend), emhawkes::logLik(kernel, dt, type, mark, lambda_component0 = initial))
 
 # Refresh semantics: even a type that did not fire receives a fresh candidate
 # at the next global event. With no excitation, targets / mu give exact waits.
@@ -88,7 +96,7 @@ dt2 <- c(0, .2, .3, .5, .1)
 type2 <- c(0, 1, 2, 1, 2)
 constant_model <- frpp_spec(constant, model$residual)
 global <- as.numeric(stats::logLik(constant_model, dt2, type2,
-  lambda_component0 = 0, backend = "state"))
+  lambda_component0 = 0, backend = frpp_numeric_backend))
 renewal <- 0
 time <- cumsum(dt2)
 for (k in 1:2) {
@@ -107,7 +115,7 @@ scaled <- vapply(c(.2, .4, .8), function(mu) {
   h <- methods::new("hspec", mu = mu, alpha = 0, beta = 1)
   m <- frpp_spec(h, residual_law(c(rate = .8 / mu), stats::dexp, stats::pexp))
   as.numeric(stats::logLik(m, c(0, .2, .3, .5), lambda_component0 = 0,
-    backend = "state"))
+    backend = frpp_numeric_backend))
 }, numeric(1))
 close(scaled, rep(scaled[1], 3))
 
@@ -118,10 +126,24 @@ for (law in list(exponential$residual, model$residual)) {
       m <- frpp_spec(constant, law)
       a <- stats::logLik(m, observed_dt, observed_type, lambda_component0 = 0, infer = TRUE)
       b <- stats::logLik(m, observed_dt, observed_type, lambda_component0 = 0,
-        infer = TRUE, backend = "state")
+        infer = TRUE, backend = frpp_numeric_backend)
       for (name in names(a)) close(a[[name]], b[[name]])
     }
   }
 }
-cat("Independent quadrature maximum integral error:", format(maximum_error, digits = 17), "\n")
+if (frpp_has_kernel_api) {
+  cat("Independent quadrature maximum integral error:", format(maximum_error, digits = 17), "\n")
+} else {
+  cat("Per-interval integral output unavailable in bridge; independent intensity and likelihood references passed.\n")
+}
 cat("Global refresh vs renewal-clock log-likelihood difference:", global - renewal, "\n")
+
+if (!frpp_has_kernel_api) {
+  set.seed(712)
+  saved_rng <- .Random.seed
+  unavailable <- tryCatch(stats::logLik(model, dt, type, mark,
+    lambda_component0 = initial, backend = "state"), error = identity)
+  stopifnot(inherits(unavailable, "error"),
+    grepl("development kernel API", conditionMessage(unavailable), fixed = TRUE),
+    identical(saved_rng, .Random.seed))
+}

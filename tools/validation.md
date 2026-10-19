@@ -115,3 +115,44 @@ FRPP files and one emhawkes kernel file. The two tests for separately pending
 simulate/nobs work require `--extended`. The earlier 11-file measurements above
 refer to that broader development tree. This separation lets the default suite
 run against the exact common-kernel-only emhawkes publication.
+
+## Cross-package CI
+
+`Package compatibility` (`.github/workflows/check.yaml`) runs on FRPP pushes to
+main, pull requests and manual dispatch. Its six jobs use release R on Windows,
+Linux and macOS, each with either current CRAN emhawkes or a checkout of
+emhawkes main. An upstream-only change needs a manual FRPP workflow run; there
+is no scheduled or cross-repository trigger.
+
+Each job installs the selected dependency and FRPP, runs the quick suite, then
+builds and checks the package with both vignettes (`--no-manual --run-donttest`).
+Warnings and errors fail the check. Both stats and maxLik are required in CI;
+no provider may disappear silently. Tests use fresh R processes sequentially.
+
+| Dependency | Quick suite | Required numerical coverage |
+|---|---|---|
+| CRAN release | All eight FRPP files | Exact legacy/bridge simulation and RNG, paired fits and restoration; independent intensity/likelihood references |
+| GitHub main | Eight FRPP files plus the common-kernel file | All release checks plus state comparisons, interval integrals and the public kernel contract |
+
+The released dependency may not export the kernel API. The tests report that
+state comparisons are unavailable and verify the explicit capability error
+without consuming RNG. The bridge does not expose interval integrals, so those
+output checks require the development API. Development jobs fail immediately
+if that API is absent. If a later CRAN version provides it, the release suite
+also exercises state calculations automatically. Numerical tolerances and exact
+comparison assertions are unchanged.
+
+Run the release suite locally, after installing FRPP and the CRAN dependency:
+
+```sh
+Rscript tools/validate-fast.R results/release --release --require-maxlik
+```
+
+Development remains the default; `--require-maxlik` makes both providers
+mandatory locally too. `--release` does not require a sibling emhawkes checkout
+and cannot be combined with `--extended`.
+
+Artifacts retain per-file logs and statuses, source/installed MD5 hashes,
+library paths, session information, installed emhawkes metadata and checkout
+commits. Quick-suite reports are uploaded even if later package checks fail.
+These are regression checks, not performance or interval-coverage evidence.

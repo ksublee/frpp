@@ -1,5 +1,11 @@
 # frpp 0.0.0.9000
 
+- Add Windows, Linux and macOS package checks against CRAN and development
+  emhawkes. Run the quick exact-result/RNG and paired-fit regression suite
+  with both optimizer providers, recording dependency identity and test coverage.
+  Released versions without the kernel API exercise the bridge and verify the
+  explicit state capability error; development jobs require all state checks.
+
 - Document the public state API in GitHub development emhawkes 1.0.1.9000.
   Limit the default quick suite to its common-kernel contract; retain the
   separately pending simulate/nobs checks behind an explicit --extended option.

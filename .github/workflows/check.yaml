@@ -1,0 +1,111 @@
+name: Package compatibility
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check:
+    name: ${{ matrix.os }} / emhawkes ${{ matrix.emhawkes }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        emhawkes: [release, development]
+    env:
+      R_KEEP_PKG_SOURCE: yes
+      _R_CHECK_SUGGESTS_ONLY_: 'false'
+      FRPP_TEST_PROFILE: ${{ matrix.emhawkes }}
+      FRPP_TEST_REQUIRE_MAXLIK: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: frpp
+      - uses: actions/checkout@v4
+        if: matrix.emhawkes == 'development'
+        with:
+          repository: ksublee/emhawkes
+          ref: main
+          path: emhawkes
+          persist-credentials: false
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          working-directory: frpp
+          extra-packages: any::rcmdcheck
+          needs: check
+          cache-version: ${{ matrix.emhawkes }}
+      - name: Install selected emhawkes and frpp
+        working-directory: frpp
+        shell: Rscript {0}
+        run: |
+          if (Sys.getenv("FRPP_TEST_PROFILE") == "development") {
+            status <- system2(file.path(R.home("bin"), "R"),
+              c("CMD", "INSTALL", "--preclean", "../emhawkes"))
+            stopifnot(status == 0L)
+          } else {
+            # Explicitly choose CRAN, even after a restored dependency cache.
+            options(repos = c(CRAN = "https://cloud.r-project.org"))
+            install.packages("emhawkes")
+            released <- available.packages()["emhawkes", "Version"]
+            stopifnot(as.character(packageVersion("emhawkes")) == released)
+          }
+          status <- system2(file.path(R.home("bin"), "R"), c("CMD", "INSTALL", "."))
+          stopifnot(status == 0L)
+          paths <- paste(.libPaths(), collapse = .Platform$path.sep)
+          cat("R_LIBS_SITE=", paths, "\n", file = Sys.getenv("GITHUB_ENV"),
+            append = TRUE, sep = "")
+      - name: Record source and installed dependency
+        working-directory: frpp
+        shell: Rscript {0}
+        run: |
+          dir.create("results/ci", recursive = TRUE)
+          capture.output(sessionInfo(), file = "results/ci/session-info.txt")
+          capture.output(packageDescription("emhawkes"), file = "results/ci/emhawkes-description.txt")
+          writeLines(system2("git", c("rev-parse", "HEAD"), stdout = TRUE), "results/ci/frpp-commit.txt")
+          if (Sys.getenv("FRPP_TEST_PROFILE") == "development") {
+            writeLines(system2("git", c("-C", "../emhawkes", "rev-parse", "HEAD"), stdout = TRUE),
+              "results/ci/emhawkes-commit.txt")
+          }
+          exports <- getNamespaceExports("emhawkes")
+          if (Sys.getenv("FRPP_TEST_PROFILE") == "development")
+            stopifnot(all(c("as_exp_kernel", "exp_kernel_replay") %in% exports))
+          stopifnot(requireNamespace("maxLik", quietly = TRUE))
+      - name: Run quick numerical and RNG regression suite
+        working-directory: frpp
+        shell: Rscript {0}
+        run: |
+          args <- c("--vanilla", "tools/validate-fast.R", "results/ci/quick")
+          if (Sys.getenv("FRPP_TEST_PROFILE") == "release") {
+            args <- c(args, "--release")
+          } else {
+            args <- c(args, "../emhawkes")
+          }
+          status <- system2(file.path(R.home("bin"), "Rscript"), c(args, "--require-maxlik"))
+          stopifnot(status == 0L)
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          working-directory: frpp
+          args: 'c("--no-manual", "--run-donttest")'
+          error-on: '"warning"'
+          upload-results: 'true'
+          artifact-name: check-${{ matrix.os }}-${{ matrix.emhawkes }}
+      - name: Upload quick-suite reports and provenance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-${{ matrix.os }}-${{ matrix.emhawkes }}
+          path: frpp/results/ci
+          if-no-files-found: warn
+          retention-days: 30

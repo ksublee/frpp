@@ -1,43 +1,56 @@
 # From the frpp repository, after installing both CURRENT source trees:
 # Rscript tools/validate-fast.R results/fast [path/to/emhawkes] [--extended]
+# Rscript tools/validate-fast.R results/release --release [--require-maxlik]
 # Installed packages supply implementation; source trees supply tests.
 args <- commandArgs(TRUE)
 extended <- "--extended" %in% args
-args <- args[args != "--extended"]
-if (length(args) < 1L || length(args) > 2L)
-  stop("Supply an output directory and optionally the emhawkes source directory.")
+release <- "--release" %in% args
+require_maxlik <- "--require-maxlik" %in% args
+args <- args[!args %in% c("--extended", "--release", "--require-maxlik")]
+if (length(args) < 1L || length(args) > 2L || (release && extended))
+  stop("Supply an output directory, optionally an emhawkes source directory; --release and --extended cannot be combined.")
 frpp_root <- normalizePath(".", mustWork = TRUE)
-em_root <- normalizePath(if (length(args) == 2L) args[2L] else "../emhawkes", mustWork = TRUE)
-for (entry in list(c(frpp_root, "frpp"), c(em_root, "emhawkes"))) {
-  description <- read.dcf(file.path(entry[1L], "DESCRIPTION"))
-  if (description[1L, "Package"] != entry[2L]) stop("Unexpected source package: ", entry[1L])
+em_root <- if (release) NULL else normalizePath(if (length(args) == 2L)
+  args[2L] else "../emhawkes", mustWork = TRUE)
+roots <- c(frpp = frpp_root, if (!is.null(em_root)) c(emhawkes = em_root))
+for (package in names(roots)) {
+  description <- read.dcf(file.path(roots[[package]], "DESCRIPTION"))
+  if (description[1L, "Package"] != package) stop("Unexpected source package: ", roots[[package]])
 }
 for (package in c("emhawkes", "frpp"))
   if (!requireNamespace(package, quietly = TRUE)) stop("Install the current ", package, " source first.")
-if (!all(c("as_exp_kernel", "exp_kernel_replay") %in% getNamespaceExports("emhawkes")))
+has_api <- all(c("as_exp_kernel", "exp_kernel_replay") %in% getNamespaceExports("emhawkes"))
+if (!release && !has_api)
   stop("This joint development suite requires the emhawkes shared-kernel API. Install the development source first; no tests were skipped.")
+if (require_maxlik && !requireNamespace("maxLik", quietly = TRUE))
+  stop("Both optimizer providers were requested but maxLik is not installed.")
+Sys.setenv(FRPP_TEST_PROFILE = if (release) "release" else "development")
+if (require_maxlik) Sys.setenv(FRPP_TEST_REQUIRE_MAXLIK = "true")
 out <- args[1L]
 dir.create(out, recursive = TRUE, showWarnings = FALSE)
 out <- normalizePath(out, mustWork = TRUE)
 # Discover every ordinary FRPP test: future regression files must not be missed.
 frpp_tests <- sort(list.files(file.path(frpp_root, "tests"), "[.]R$", full.names = TRUE))
 if (!length(frpp_tests)) stop("No FRPP tests found.")
-em_tests <- file.path(em_root, "tests", c("exp-kernel.R",
+em_tests <- if (release) character() else file.path(em_root, "tests", c("exp-kernel.R",
   if (extended) c("simulate-interface.R", "fit-observations.R")))
 tests <- c(frpp_tests, em_tests)
 missing_tests <- tests[!file.exists(tests)]
 if (length(missing_tests)) stop("Selected test files are missing: ", paste(missing_tests, collapse = ", "))
-labels <- c(paste0("frpp/", basename(frpp_tests)), paste0("emhawkes/", basename(em_tests)))
+labels <- c(paste0("frpp/", basename(frpp_tests)),
+  if (length(em_tests)) paste0("emhawkes/", basename(em_tests)))
 libraries <- file.path(out, "libraries.rds")
 saveRDS(.libPaths(), libraries)
 wrapper <- file.path(out, "run-one.R")
 writeLines(c("args <- commandArgs(TRUE)", ".libPaths(readRDS(args[1L]))",
-  "sys.source(args[2L], envir = .GlobalEnv)"), wrapper)
+  "sys.source(args[2L], envir = .GlobalEnv, chdir = TRUE)"), wrapper)
 executable <- file.path(R.home("bin"), if (.Platform$OS.type == "windows") "Rscript.exe" else "Rscript")
 has_maxlik <- requireNamespace("maxLik", quietly = TRUE)
-coverage <- c(if (extended)
+coverage <- c(if (release)
+  "Scope: all FRPP tests against the installed released emhawkes; no development source tests." else if (extended)
   "Scope: all FRPP tests, the shared kernel, and the additional simulate/observation-count development tests." else
   "Scope: all FRPP tests plus the public shared-kernel emhawkes test.",
+  paste0("State numerical comparisons: ", if (has_api) "required and enabled" else "unavailable; bridge and capability-error checks enabled"),
   "Tests execute INSTALLED implementations. Reinstall both source trees after runtime edits; hashes record identity, not source/install equivalence.",
   paste0("maxLik: ", if (has_maxlik) "included" else "NOT INSTALLED; optional provider cases will not run"),
   "Not a replacement for full R CMD check, platform CI, large joint fits or coverage experiments.",
@@ -45,7 +58,7 @@ coverage <- c(if (extended)
 writeLines(coverage, file.path(out, "coverage.txt"))
 cat(paste(coverage, collapse = "\n"), "\n")
 # Record both tested source and installed implementation, not just version labels.
-source_hashes <- do.call(rbind, lapply(c(frpp_root, em_root), function(root) {
+source_hashes <- do.call(rbind, lapply(unname(roots), function(root) {
   paths <- c(file.path(root, c("DESCRIPTION", "NAMESPACE")),
     list.files(file.path(root, "R"), full.names = TRUE, recursive = TRUE),
     list.files(file.path(root, "src"), "[.](cpp|h)$", full.names = TRUE, recursive = TRUE),

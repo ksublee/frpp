@@ -1,4 +1,5 @@
 library(frpp)
+source(file.path("helpers", "kernel-api.R"))
 stopifnot(!("package:emhawkes" %in% search()))
 close <- function(x, y, tol = 1e-7) {
   if (!isTRUE(all.equal(x, y, tolerance = tol))) { print(x, digits = 17); print(y, digits = 17); stop("Analytic comparison failed") }
@@ -46,9 +47,11 @@ for (provider in providers) {
   stopifnot(identical(actual$inter_arrival, expected$inter_arrival))
 }
 stopifnot(identical(serialize(model, NULL), saved_model))
-state <- precise_fit(model, dt, optimizer = "stats", backend = "state",
-  fixed = c(FALSE, TRUE, TRUE), lambda_component0 = 0)
-close(unname(coef(state)["mu1"]), 3)
+if (frpp_has_kernel_api) {
+  state <- precise_fit(model, dt, optimizer = "stats", backend = "state",
+    fixed = c(FALSE, TRUE, TRUE), lambda_component0 = 0)
+  close(unname(coef(state)["mu1"]), 3)
+}
 converted <- as_fspec(as_legacy_hspec(model))
 converted_fit <- precise_fit(converted, dt, optimizer = "stats", lambda_component0 = 0,
   fixed = c(FALSE, TRUE, TRUE))
