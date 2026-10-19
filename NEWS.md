@@ -1,5 +1,10 @@
 # frpp 0.0.0.9000
 
+- Reuse a public prepared emhawkes kernel plan in the independent simulator,
+  avoiding repeated validation of fixed kernel parameters and baseline. Keep
+  changing-state/residual checks, exact paths and RNG order, and bridge default.
+  Older event-wise API installations retain the existing checked calculation.
+
 - Add an independent numeric FRPP simulation event loop using public event-wise
   emhawkes kernel APIs. Keep bridge as the default; optional state/auto backends preserve the
   all-dimension residual refresh rule and keep callback/older-version support

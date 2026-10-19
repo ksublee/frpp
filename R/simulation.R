@@ -62,8 +62,23 @@ prepare_frpp_simulation <- function(object, size, initial, N0, Nc0) {
     initial <- rep_len(as.numeric(initial), count)
   }
   initial <- matrix(initial, d, kernel$kernel_cols)
-  step <- getExportedValue("emhawkes", "exp_kernel_step")
-  component <- step(kernel, initial, 0, integrate = FALSE)$before
+  mu <- object@kernel@mu
+  # Fix the kernel/baseline once. Older event-wise APIs retain the checked path.
+  # Invalid baselines keep their original error timing at the first wait call.
+  has_plan <- "exp_kernel_plan" %in% getNamespaceExports("emhawkes")
+  valid_mu <- is.numeric(mu) && !is.object(mu) && length(mu) %in% c(1L, d) &&
+    all(is.finite(mu)) && all(mu >= 0)
+  if (has_plan && valid_mu) {
+    prepared <- getExportedValue("emhawkes", "exp_kernel_plan")(kernel, mu)
+    step <- prepared$step; wait <- prepared$wait
+  } else {
+    step_api <- getExportedValue("emhawkes", "exp_kernel_step")
+    wait_api <- getExportedValue("emhawkes", "exp_kernel_wait")
+    step <- function(component, dt, type = NULL, mark = 1, integrate = TRUE)
+      step_api(kernel, component, dt, type, mark, integrate)
+    wait <- function(component, residual) wait_api(kernel, component, mu, residual)
+  }
+  component <- step(initial, 0, integrate = FALSE)$before
   if (!frpp_simulation_components_valid(component))
     stop("Initial kernel components must define nonnegative, decreasing excitation; signed components must satisfy the decay-rate cumulative-sum condition (see ?hsim).", call. = FALSE)
   # Reuse only the public residual-function binding contract, not its simulator.
@@ -71,7 +86,7 @@ prepare_frpp_simulation <- function(object, size, initial, N0, Nc0) {
   list(kernel = kernel, mu = object@kernel@mu, component = component,
     N0 = N0, Nc0 = Nc0, size = size, selection = selection, rng = rng,
     draw_size = object@kernel@dimens,
-    step = step, wait = getExportedValue("emhawkes", "exp_kernel_wait"))
+    step = step, wait = wait)
 }
 
 simulate_frpp_state <- function(object, plan) {
@@ -98,7 +113,7 @@ simulate_frpp_state <- function(object, plan) {
     if (!frpp_simulation_components_valid(component))
       stop("Simulation requires finite, nonnegative baselines and nonnegative, decreasing excitation; signed components must satisfy the decay-rate cumulative-sum condition (see ?hsim).", call. = FALSE)
     residual <- plan$rng(plan$draw_size)
-    candidates <- plan$wait(kernel, component, mu, residual)
+    candidates <- plan$wait(component, residual)
     dt <- min(candidates, na.rm = TRUE)
     if (is.infinite(dt)) {
       warning(sprintf("Simulation stopped early: no further event occurs on this path. Returned %d of %.0f requested rows (including the initial row).", generated, size), call. = FALSE)
@@ -108,7 +123,7 @@ simulate_frpp_state <- function(object, plan) {
     inter_arrival[n] <- dt; type[n] <- event; generated <- n
     N[n, ] <- N[n - 1L, ]; N[n, event] <- N[n - 1L, event] + 1
     Nc[n, ] <- Nc[n - 1L, ]; Nc[n, event] <- Nc[n - 1L, event] + mark[n]
-    advanced <- plan$step(kernel, component, dt, event, mark[n], integrate = FALSE)
+    advanced <- plan$step(component, dt, event, mark[n], integrate = FALSE)
     lambda_component[n, ] <- t(advanced$before)
     lambda[n, ] <- mu + rowSums(advanced$before)
     rambda_component[n, ] <- t(advanced$after)

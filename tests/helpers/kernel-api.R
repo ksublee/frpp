@@ -18,4 +18,8 @@ frpp_has_sim_api <- all(c("exp_kernel_step", "exp_kernel_wait") %in%
   getNamespaceExports("emhawkes"))
 if (frpp_test_profile == "development" && !frpp_has_sim_api)
   stop("Development validation requires the event-wise emhawkes kernel API; independent simulation tests may not be omitted.")
+frpp_has_plan_api <- "exp_kernel_plan" %in% getNamespaceExports("emhawkes")
+if (frpp_test_profile == "development" && !frpp_has_plan_api)
+  stop("Development validation requires the prepared emhawkes kernel API; no plan tests may be omitted.")
+cat("Prepared kernel plan:", if (frpp_has_plan_api) "enabled" else "unavailable; existing API compatibility enabled", "\n")
 cat("Independent simulation:", if (frpp_has_sim_api) "enabled" else "unavailable; bridge compatibility enabled", "\n")

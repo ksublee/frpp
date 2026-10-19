@@ -138,10 +138,14 @@ path <- fsim(model, size = 1000, seed = 73, lambda_component0 = 0,
 
 This requires the event-wise APIs in current GitHub development emhawkes.
 FRPP draws one residual vector for all dimensions, inverts its integrated drivers
-with `exp_kernel_wait()`, chooses the first minimum by row, and calls
-`exp_kernel_step()` to decay and update mapped columns. It records the original
+with a prepared `exp_kernel_plan()` when available, chooses the first minimum
+by row, and calls its `step()` function to decay and update mapped columns. It records the original
 path fields, counts and component histories. No hsim call or growing-prefix
-replay occurs in this backend. The shared calculation layer contains no RNG.
+replay occurs in this backend. The plan validates fixed kernel parameters and
+baseline once; changing components and residual targets remain checked. It stores
+no current state. Installations with the earlier event-wise API use its checked
+`exp_kernel_wait()` and `exp_kernel_step()` calls instead. The shared calculation
+layer contains no RNG.
 
 The first scope is plain numeric baseline and kernel parameters, including
 numeric eta, zero baselines and admissible signed components. No baseline,
