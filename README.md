@@ -27,5 +27,6 @@ model <- fspec(kernel, law)
 path <- fsim(model, size = 1000, seed = 73, lambda_component0 = 0)
 ```
 
-The default backend uses emhawkes 1.0.0 or later. The experimental `state`
-backend uses the public kernel API in GitHub development emhawkes 1.0.1.9000.
+The default `bridge` uses emhawkes 1.0.0 or later. Optional `state` simulation
+and likelihood use the public kernel APIs in current GitHub development emhawkes.
+See the documentation for support and timing limits.

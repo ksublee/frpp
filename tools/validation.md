@@ -156,3 +156,18 @@ Artifacts retain per-file logs and statuses, source/installed MD5 hashes,
 library paths, session information, installed emhawkes metadata and checkout
 commits. Quick-suite reports are uploaded even if later package checks fail.
 These are regression checks, not performance or interval-coverage evidence.
+
+
+## Independent simulator follow-up
+
+The daily development suite now discovers nine FRPP files and two emhawkes
+kernel files (11 total). The release profile runs nine FRPP files. Development
+requires the event-wise APIs as well as replay; missing APIs cannot silently
+turn state validation into bridge-only coverage. The new paired simulation file
+checks 72 model/law/seed/size combinations, exact full paths and final/following
+RNG, independent R/C++ driver restoration, direct-loop execution, argument
+forcing, errors before subsequent draws, ties and early termination.
+
+Default simulation remains bridge; tests explicitly select state to validate
+the independent loop. Performance experiments are separate from this quick
+suite. See [independent simulation results](independent-simulation-results.md).

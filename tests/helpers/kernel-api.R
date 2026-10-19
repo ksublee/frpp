@@ -13,3 +13,9 @@ cat("emhawkes", as.character(utils::packageVersion("emhawkes")),
   "; profile:", frpp_test_profile, "; backends:", paste(frpp_backends, collapse = ", "), "\n")
 if (!frpp_has_kernel_api)
   cat("State numerical comparisons unavailable in this emhawkes version; bridge checks and explicit capability-error checks remain active.\n")
+
+frpp_has_sim_api <- all(c("exp_kernel_step", "exp_kernel_wait") %in%
+  getNamespaceExports("emhawkes"))
+if (frpp_test_profile == "development" && !frpp_has_sim_api)
+  stop("Development validation requires the event-wise emhawkes kernel API; independent simulation tests may not be omitted.")
+cat("Independent simulation:", if (frpp_has_sim_api) "enabled" else "unavailable; bridge compatibility enabled", "\n")

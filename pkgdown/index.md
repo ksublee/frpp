@@ -39,7 +39,10 @@ for each dimension.
 The default likelihood backend and simulator use public emhawkes interfaces.
 The experimental `state` backend assembles the FRPP likelihood from a shared
 kernel replay API available in GitHub development emhawkes 1.0.1.9000.
-Examples detect whether it is installed and label unavailable comparisons.
+Optional `state` simulation owns the FRPP event loop and uses event-wise
+kernel APIs from current GitHub development emhawkes. The bridge remains the
+default because the numeric reference loop is slower for large paths.
+Examples detect available APIs and label the simulation backend and comparisons.
 
 Residual parameters remain fixed during fitting unless joint estimation is
 requested. A successful optimizer or a positive covariance matrix does not

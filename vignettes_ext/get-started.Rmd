@@ -97,3 +97,13 @@ conditional intensities of a general FRPP.
 
 Continue with [Fitting and inference](fitting-and-inference.html), or see
 the [multivariate examples](frpp-examples.html).
+
+
+## Optional independent simulator
+
+The default simulator remains the compatibility bridge. With current GitHub
+development emhawkes, choose `fsim(model, backend = "state", ...)` to use the
+independent numeric FRPP event loop. It preserves global residual refresh and
+path/RNG behavior, but is currently slower on larger paths. Event callbacks
+remain in the bridge. `backend = "auto"` opts into capability-based selection;
+see [Model and computation](model-and-computation.html) for the support contract.

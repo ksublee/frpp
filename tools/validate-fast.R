@@ -20,8 +20,11 @@ for (package in names(roots)) {
 for (package in c("emhawkes", "frpp"))
   if (!requireNamespace(package, quietly = TRUE)) stop("Install the current ", package, " source first.")
 has_api <- all(c("as_exp_kernel", "exp_kernel_replay") %in% getNamespaceExports("emhawkes"))
+has_sim_api <- all(c("exp_kernel_step", "exp_kernel_wait") %in% getNamespaceExports("emhawkes"))
 if (!release && !has_api)
   stop("This joint development suite requires the emhawkes shared-kernel API. Install the development source first; no tests were skipped.")
+if (!release && !has_sim_api)
+  stop("This joint development suite requires the event-wise emhawkes kernel API. No independent simulation checks were skipped.")
 if (require_maxlik && !requireNamespace("maxLik", quietly = TRUE))
   stop("Both optimizer providers were requested but maxLik is not installed.")
 Sys.setenv(FRPP_TEST_PROFILE = if (release) "release" else "development")
@@ -32,7 +35,7 @@ out <- normalizePath(out, mustWork = TRUE)
 # Discover every ordinary FRPP test: future regression files must not be missed.
 frpp_tests <- sort(list.files(file.path(frpp_root, "tests"), "[.]R$", full.names = TRUE))
 if (!length(frpp_tests)) stop("No FRPP tests found.")
-em_tests <- if (release) character() else file.path(em_root, "tests", c("exp-kernel.R",
+em_tests <- if (release) character() else file.path(em_root, "tests", c("exp-kernel.R", "exp-kernel-step.R",
   if (extended) c("simulate-interface.R", "fit-observations.R")))
 tests <- c(frpp_tests, em_tests)
 missing_tests <- tests[!file.exists(tests)]
@@ -49,8 +52,9 @@ has_maxlik <- requireNamespace("maxLik", quietly = TRUE)
 coverage <- c(if (release)
   "Scope: all FRPP tests against the installed released emhawkes; no development source tests." else if (extended)
   "Scope: all FRPP tests, the shared kernel, and the additional simulate/observation-count development tests." else
-  "Scope: all FRPP tests plus the public shared-kernel emhawkes test.",
+  "Scope: all FRPP tests plus the public replay and event-wise emhawkes kernel tests.",
   paste0("State numerical comparisons: ", if (has_api) "required and enabled" else "unavailable; bridge and capability-error checks enabled"),
+  paste0("Independent simulation: ", if (has_sim_api) "required and enabled" else "unavailable; bridge/auto fallback and capability-error checks enabled"),
   "Tests execute INSTALLED implementations. Reinstall both source trees after runtime edits; hashes record identity, not source/install equivalence.",
   paste0("maxLik: ", if (has_maxlik) "included" else "NOT INSTALLED; optional provider cases will not run"),
   "Not a replacement for full R CMD check, platform CI, large joint fits or coverage experiments.",

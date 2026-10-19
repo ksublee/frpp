@@ -1,5 +1,5 @@
 fsim <- function(object, size = 100, lambda_component0 = "auto", N0 = NULL,
-                  Nc0 = NULL, seed = NULL, ...) {
+                  Nc0 = NULL, seed = NULL, ..., backend = c("bridge", "state", "auto")) {
   if (!is_fspec(object))
     stop("object must be an fspec or frpp_spec.", call. = FALSE)
   object <- as_fspec(object)
@@ -9,7 +9,12 @@ fsim <- function(object, size = 100, lambda_component0 = "auto", N0 = NULL,
   if (is.matrix(beta) && any(vapply(seq_len(nrow(beta)),
     function(i) any(beta[i, ] != beta[i, 1]), logical(1))))
     stop("FRPP simulation requires equal beta values within each row.", call. = FALSE)
-  legacy <- as_legacy_hspec(object)
+  backend <- match.arg(backend)
+  reason <- if (backend == "bridge") NULL else frpp_simulation_reason(object, ...length())
+  if (backend == "state" && !is.null(reason))
+    stop("FRPP state simulation is unavailable: ", reason, ". Use backend = 'bridge'.", call. = FALSE)
+  independent <- backend != "bridge" && is.null(reason)
+  legacy <- if (!independent) as_legacy_hspec(object) else NULL
   if (!is.null(seed)) {
     had_seed <- exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
     old_seed <- if (had_seed) get(".Random.seed", envir = .GlobalEnv) else NULL
@@ -22,6 +27,8 @@ fsim <- function(object, size = 100, lambda_component0 = "auto", N0 = NULL,
     }, add = TRUE)
     set.seed(seed)
   }
+  if (independent) return(simulate_frpp_state(object,
+    prepare_frpp_simulation(object, size, lambda_component0, N0, Nc0)))
   path <- emhawkes::hsim(legacy, size = size,
     lambda_component0 = lambda_component0, N0 = N0, Nc0 = Nc0, ...)
   values <- unclass(path)

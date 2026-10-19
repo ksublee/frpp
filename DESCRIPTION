@@ -18,5 +18,6 @@ BugReports: https://github.com/ksublee/frpp/issues
 Collate:
     'spec.R'
     'state-likelihood.R'
+    'simulation.R'
     'operations.R'
     'fit.R'
