@@ -46,3 +46,9 @@ See [validation instructions](validation.md) for trigger and coverage limits.
 
 Cross-platform results are reported by the Package compatibility workflow on
 GitHub; the local results above do not imply that remote jobs have passed.
+
+The first macOS CI logs reported the Node.js 20 deprecation warning from the
+copied v4 checkout/upload actions. The new compatibility workflow now uses
+verified Node.js 24 releases: checkout v7.0.1 and upload-artifact v7.0.2. Their
+input contracts were checked before the update. Package and test code did not
+change in this follow-up; the final CI run validates the updated actions.

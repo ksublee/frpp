@@ -25,10 +25,10 @@ jobs:
       FRPP_TEST_PROFILE: ${{ matrix.emhawkes }}
       FRPP_TEST_REQUIRE_MAXLIK: 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
         with:
           path: frpp
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
         if: matrix.emhawkes == 'development'
         with:
           repository: ksublee/emhawkes
@@ -103,7 +103,7 @@ jobs:
           artifact-name: check-${{ matrix.os }}-${{ matrix.emhawkes }}
       - name: Upload quick-suite reports and provenance
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: regression-${{ matrix.os }}-${{ matrix.emhawkes }}
           path: frpp/results/ci
