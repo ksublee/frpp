@@ -263,11 +263,16 @@ engines.</p>
 <span>             backend <span class="op">=</span> <span class="st">"state"</span><span class="op">)</span></span></code></pre></div>
 <p>This requires the event-wise APIs in current GitHub development
 emhawkes. FRPP draws one residual vector for all dimensions, inverts its
-integrated drivers with <code>exp_kernel_wait()</code>, chooses the
-first minimum by row, and calls <code>exp_kernel_step()</code> to decay
-and update mapped columns. It records the original path fields, counts
-and component histories. No hsim call or growing-prefix replay occurs in
-this backend. The shared calculation layer contains no RNG.</p>
+integrated drivers with a prepared <code>exp_kernel_plan()</code> when
+available, chooses the first minimum by row, and calls its
+<code><a href="https://rdrr.io/r/stats/step.html" class="external-link">step()</a></code> function to decay and update mapped columns. It
+records the original path fields, counts and component histories. No
+hsim call or growing-prefix replay occurs in this backend. The plan
+validates fixed kernel parameters and baseline once; changing components
+and residual targets remain checked. It stores no current state.
+Installations with the earlier event-wise API use its checked
+<code>exp_kernel_wait()</code> and <code>exp_kernel_step()</code> calls
+instead. The shared calculation layer contains no RNG.</p>
 <p>The first scope is plain numeric baseline and kernel parameters,
 including numeric eta, zero baselines and admissible signed components.
 No baseline, impact, mark-generator or mark-density event callbacks run
