@@ -171,3 +171,15 @@ forcing, errors before subsequent draws, ties and early termination.
 Default simulation remains bridge; tests explicitly select state to validate
 the independent loop. Performance experiments are separate from this quick
 suite. See [independent simulation results](independent-simulation-results.md).
+
+
+## Parameter-contract validation
+
+The daily suite now includes public parameter-plan checks and numeric FRPP
+restoration/fallback checks. See [the parameter-contract report](parameter-contract-results.md)
+for the old/new coordinate comparison, both optimizer providers, fresh large
+paired re-estimation and cross-version saved-result validation. Expensive refits
+remain separate from the daily suite. Run at least one matched large pair for
+accuracy; use at least three alternating repetitions when reporting fitting
+performance. An accuracy-only run must omit timing summaries rather than
+aggregate missing elapsed values.

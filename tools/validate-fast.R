@@ -27,6 +27,8 @@ if (!release && !has_sim_api)
   stop("This joint development suite requires the event-wise emhawkes kernel API. No independent simulation checks were skipped.")
 if (!release && !"exp_kernel_plan" %in% getNamespaceExports("emhawkes"))
   stop("This joint development suite requires the prepared emhawkes kernel API. No plan checks were skipped.")
+if (!release && !"parameter_plan" %in% getNamespaceExports("emhawkes"))
+  stop("This joint development suite requires the public parameter registration API. No parameter checks were skipped.")
 if (require_maxlik && !requireNamespace("maxLik", quietly = TRUE))
   stop("Both optimizer providers were requested but maxLik is not installed.")
 Sys.setenv(FRPP_TEST_PROFILE = if (release) "release" else "development")
@@ -37,7 +39,7 @@ out <- normalizePath(out, mustWork = TRUE)
 # Discover every ordinary FRPP test: future regression files must not be missed.
 frpp_tests <- sort(list.files(file.path(frpp_root, "tests"), "[.]R$", full.names = TRUE))
 if (!length(frpp_tests)) stop("No FRPP tests found.")
-em_tests <- if (release) character() else file.path(em_root, "tests", c("exp-kernel.R", "exp-kernel-step.R", "exp-kernel-plan.R",
+em_tests <- if (release) character() else file.path(em_root, "tests", c("exp-kernel.R", "exp-kernel-step.R", "exp-kernel-plan.R", "parameter-plan.R",
   if (extended) c("simulate-interface.R", "fit-observations.R")))
 tests <- c(frpp_tests, em_tests)
 missing_tests <- tests[!file.exists(tests)]

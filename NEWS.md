@@ -1,5 +1,10 @@
 # frpp 0.0.0.9000
 
+- Register and restore numeric kernels and raw residual parameters through the
+  public emhawkes parameter-plan contract. Preserve hfit optimization, parameter
+  coordinates, residual freezing and saved results; callback/older-version
+  reconstruction remains available.
+
 - Reuse a public prepared emhawkes kernel plan in the independent simulator,
   avoiding repeated validation of fixed kernel parameters and baseline. Keep
   changing-state/residual checks, exact paths and RNG order, and bridge default.

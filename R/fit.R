@@ -14,6 +14,38 @@ fixed_residual_spec <- function(model) {
   object
 }
 
+# Explicit numeric registration; callbacks and older dependencies keep hfit's
+# legacy reconstruction. Optimization itself continues to use public hfit.
+frpp_parameter_plan <- function(object, reduced, estimate_residual) {
+  if (!"parameter_plan" %in% getNamespaceExports("emhawkes")) return(NULL)
+  h <- object@kernel; law <- object@residual
+  values <- list(mu=h@mu, alpha=h@alpha, beta=h@beta, eta=h@eta)
+  if (law$binding != "raw" || is.null(law$functions$density) ||
+      !is.null(h@impact) || !is.null(h@rmark) || !is.null(h@dmark) ||
+      any(vapply(values,function(x) !is.null(x) &&
+        (!is.numeric(x) || is.complex(x) || is.object(x)),logical(1)))) return(NULL)
+  values$residual <- if (estimate_residual) law$param else numeric()
+  # hfit already emitted the legacy sharing warning before optimization.
+  withCallingHandlers(getExportedValue("emhawkes","parameter_plan")(
+    values, named="residual", reduced=reduced), warning=function(w) {
+      if (startsWith(conditionMessage(w),
+          "Shared parameters have different starting values; using the first value for: "))
+        invokeRestart("muffleWarning")
+    })
+}
+
+restore_numeric_frpp <- function(object, plan, coefficients, estimate_residual) {
+  values <- plan$restore(coefficients)
+  kernel <- methods::new("hspec",mu=values$mu,alpha=values$alpha,
+    beta=values$beta,eta=values$eta,type_col_map=object@kernel@type_col_map)
+  law <- object@residual
+  if (estimate_residual) {
+    shared <- intersect(names(law$param),names(coefficients))
+    law$param[shared] <- values$residual[shared]
+  }
+  fspec(kernel,law)
+}
+
 ffit <- function(object, inter_arrival, type = NULL, mark = NULL,
                  N = NULL, Nc = NULL, N0 = NULL, Nc0 = NULL,
                  lambda_component0 = "auto", estimate_residual = FALSE,
@@ -70,15 +102,20 @@ ffit <- function(object, inter_arrival, type = NULL, mark = NULL,
   fit <- do.call(emhawkes::hfit, args)
   if (is.null(fit)) stop("The optimizer did not return a fit.", call. = FALSE)
   estimate <- stats::coef(fit)
-  restored <- as_fspec(emhawkes::fitted_hspec(fit))
-  if (object@residual$binding == "raw") {
-    law <- object@residual
-    if (estimate_residual) {
-      shared <- intersect(names(law$param), names(estimate))
-      law$param[shared] <- estimate[shared]
-    }
-    restored <- fspec(restored@kernel, law)
-  } else if (!estimate_residual) restored <- fspec(restored@kernel, object@residual)
+  registration <- frpp_parameter_plan(object, reduced, estimate_residual)
+  if (!is.null(registration)) {
+    restored <- restore_numeric_frpp(object, registration, estimate, estimate_residual)
+  } else {
+    restored <- as_fspec(emhawkes::fitted_hspec(fit))
+    if (object@residual$binding == "raw") {
+      law <- object@residual
+      if (estimate_residual) {
+        shared <- intersect(names(law$param), names(estimate))
+        law$param[shared] <- estimate[shared]
+      }
+      restored <- fspec(restored@kernel, law)
+    } else if (!estimate_residual) restored <- fspec(restored@kernel, object@residual)
+  }
   active <- if (optimizer == "stats") fit$active else maxLik::activePar(fit)
   code <- if (optimizer == "stats") fit$code else maxLik::returnCode(fit)
   message <- if (optimizer == "stats") fit$message else maxLik::returnMessage(fit)
