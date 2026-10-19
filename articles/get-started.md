@@ -116,3 +116,15 @@ Continue with [Fitting and
 inference](https://ksublee.github.io/frpp/articles/fitting-and-inference.md),
 or see the [multivariate
 examples](https://ksublee.github.io/frpp/articles/frpp-examples.md).
+
+## Optional independent simulator
+
+The default simulator remains the compatibility bridge. With current
+GitHub development emhawkes, choose
+`fsim(model, backend = "state", ...)` to use the independent numeric
+FRPP event loop. It preserves global residual refresh and path/RNG
+behavior, but is currently slower on larger paths. Event callbacks
+remain in the bridge. `backend = "auto"` opts into capability-based
+selection; see [Model and
+computation](https://ksublee.github.io/frpp/articles/model-and-computation.md)
+for the support contract.

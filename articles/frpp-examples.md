@@ -13,12 +13,14 @@ and uniform examples inherited their random state from earlier examples.
 `size` includes the initial row. The initial component state is
 explicitly zero.
 
-The model contains a kernel and a residual law. The current simulation
-and default `bridge` likelihood reuse public emhawkes functions. The
-`state` backend assembles the FRPP likelihood from the public kernel
-replay API, excluding the baseline. Kernel components are driving
-quantities, rather than the conditional intensity of a general FRPP. All
-dimensions redraw candidate residuals after every event.
+The model contains a kernel and a residual law. The default `bridge`
+simulator and likelihood reuse public emhawkes functions. These examples
+explicitly select the independent `state` simulator when its event-wise
+kernel APIs are installed, and report the selected backend. The state
+likelihood separately uses public kernel replay, excluding the baseline.
+Kernel components are driving quantities, rather than the conditional
+intensity of a general FRPP. All dimensions redraw candidate residuals
+after every event.
 
 The optional state comparisons require the public shared-kernel API in
 GitHub development emhawkes 1.0.1.9000. When it is not installed,
@@ -35,7 +37,7 @@ tz_law <- residual_law(c(a = 0.7, ell = 1.6),
 model_1d <- fspec(
   methods::new("hspec", mu = 0.5, alpha = 1, beta = 1.2), tz_law)
 set.seed(1107)
-path_1d <- fsim(model_1d, size = 3000, lambda_component0 = 0)
+path_1d <- fsim(model_1d, size = 3000, lambda_component0 = 0, backend = simulation_backend)
 seed_1d <- .Random.seed
 inferred_1d <- logLik(model_1d, path_1d$inter_arrival,
   lambda_component0 = 0, infer = TRUE)
@@ -65,7 +67,7 @@ kernel_2d <- methods::new("hspec", mu = c(0.3, 0.3),
   beta = matrix(1.5, 2, 2))
 model_2d <- fspec(kernel_2d, tz_law)
 set.seed(1107)
-path_2d <- fsim(model_2d, size = 10000, lambda_component0 = 0)
+path_2d <- fsim(model_2d, size = 10000, lambda_component0 = 0, backend = simulation_backend)
 seed_2d <- .Random.seed
 inferred_2d <- logLik(model_2d, path_2d$inter_arrival, path_2d$type,
   lambda_component0 = 0, infer = TRUE)
@@ -104,7 +106,7 @@ uniform_law <- residual_law(c(min = 0, max = 2),
 model_uniform <- fspec(methods::new("hspec", mu = c(0.5, 0.5),
   alpha = matrix(0.3, 2, 2), beta = matrix(1.2, 2, 2)), uniform_law)
 set.seed(1107)
-path_uniform <- fsim(model_uniform, size = 5000, lambda_component0 = 0)
+path_uniform <- fsim(model_uniform, size = 5000, lambda_component0 = 0, backend = simulation_backend)
 seed_uniform <- .Random.seed
 inferred_uniform <- logLik(model_uniform, path_uniform$inter_arrival,
   path_uniform$type, lambda_component0 = 0, infer = TRUE)
@@ -166,7 +168,8 @@ compare_example <- function(reference, path, seed_after, bridge, state) {
   stopifnot(identical(bridge, expected))
   shared <- names(expected)
   if (!is.null(state)) stopifnot(isTRUE(all.equal(state[shared], expected, tolerance = 1e-10)))
-  data.frame(rows = length(path$type), simulation_exact = TRUE, rng_exact = TRUE,
+  data.frame(rows = length(path$type), simulation_backend = simulation_backend,
+    simulation_exact = TRUE, rng_exact = TRUE,
     bridge_exact = TRUE,
     state_loglik_difference = if (is.null(state)) NA_real_ else state$loglikelihood - expected$loglikelihood,
     maximum_state_output_difference = if (is.null(state)) NA_real_ else max(vapply(shared, function(nm)
@@ -179,10 +182,10 @@ comparison <- rbind(
   uniform_2d = compare_example(reference_uniform, path_uniform, seed_uniform,
     inferred_uniform, state_uniform))
 comparison
-#>             rows simulation_exact rng_exact bridge_exact
-#> tzexp_1d    3000             TRUE      TRUE         TRUE
-#> tzexp_2d   10000             TRUE      TRUE         TRUE
-#> uniform_2d  5000             TRUE      TRUE         TRUE
+#>             rows simulation_backend simulation_exact rng_exact bridge_exact
+#> tzexp_1d    3000              state             TRUE      TRUE         TRUE
+#> tzexp_2d   10000              state             TRUE      TRUE         TRUE
+#> uniform_2d  5000              state             TRUE      TRUE         TRUE
 #>            state_loglik_difference maximum_state_output_difference
 #> tzexp_1d             -7.048584e-12                    7.048584e-12
 #> tzexp_2d              5.456968e-12                    5.456968e-12

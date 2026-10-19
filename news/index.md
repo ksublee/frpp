@@ -2,6 +2,12 @@
 
 ## frpp 0.0.0.9000
 
+- Add an independent numeric FRPP simulation event loop using public
+  event-wise emhawkes kernel APIs. Keep bridge as the default; optional
+  state/auto backends preserve the all-dimension residual refresh rule
+  and keep callback/older-version support in the bridge. Backend support
+  is selected before any random draws.
+
 - Add Windows, Linux and macOS package checks against CRAN and
   development emhawkes. Run the quick exact-result/RNG and paired-fit
   regression suite with both optimizer providers, recording dependency

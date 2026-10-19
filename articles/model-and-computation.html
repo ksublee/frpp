@@ -172,23 +172,28 @@ observation interval.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>Simulation</td>
-<td>
-<code><a href="../reference/operations.html">fsim()</a></code> uses the existing public emhawkes FRPP event
-loop</td>
+<td>Default simulation, <code>bridge</code>
+</td>
+<td>Uses the existing public emhawkes FRPP event loop</td>
 </tr>
 <tr class="even">
+<td>Optional simulation, <code>state</code>
+</td>
+<td>FRPP owns the event loop, using public event-wise kernel
+calculations</td>
+</tr>
+<tr class="odd">
 <td>Default likelihood, <code>bridge</code>
 </td>
 <td>Uses emhawkes’s existing FRPP likelihood</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Experimental likelihood, <code>state</code>
 </td>
 <td>Uses public kernel replay, then assembles FRPP density and survival
 contributions</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Estimation</td>
 <td>
 <code><a href="../reference/ffit.html">ffit()</a></code> supplies an FRPP objective to public emhawkes
@@ -244,9 +249,43 @@ in emhawkes.</p>
 <div class="section level2">
 <h2 id="next-development-steps">Next development steps<a class="anchor" aria-label="anchor" href="#next-development-steps"></a>
 </h2>
-<p>Independent FRPP simulation and estimation reconstruction remain
-future work. The current public replay API is a first shared calculation
-boundary, not a complete separation of the two packages’ engines.</p>
+<p>The numeric independent FRPP simulator is available as an optional
+backend. Callback simulation and independent estimation reconstruction
+remain future work. The current public replay API is a first shared
+calculation boundary, not a complete separation of the two packages’
+engines.</p>
+</div>
+<div class="section level2">
+<h2 id="independent-numeric-simulation">Independent numeric simulation<a class="anchor" aria-label="anchor" href="#independent-numeric-simulation"></a>
+</h2>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/operations.html">fsim</a></span><span class="op">(</span><span class="va">model</span>, size <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">73</span>, lambda_component0 <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>             backend <span class="op">=</span> <span class="st">"state"</span><span class="op">)</span></span></code></pre></div>
+<p>This requires the event-wise APIs in current GitHub development
+emhawkes. FRPP draws one residual vector for all dimensions, inverts its
+integrated drivers with <code>exp_kernel_wait()</code>, chooses the
+first minimum by row, and calls <code>exp_kernel_step()</code> to decay
+and update mapped columns. It records the original path fields, counts
+and component histories. No hsim call or growing-prefix replay occurs in
+this backend. The shared calculation layer contains no RNG.</p>
+<p>The first scope is plain numeric baseline and kernel parameters,
+including numeric eta, zero baselines and admissible signed components.
+No baseline, impact, mark-generator or mark-density event callbacks run
+in this backend. Marks are one. Residual generators are retained with
+their existing parameter binding and run once per attempted global
+event. Current-state validity is checked before each new draw, and an
+error never restarts the bridge.</p>
+<p><code>bridge</code> remains the default because the reference
+independent loop is slower for large paths.
+<code>backend = "auto"</code> is an explicit opt-in selector: it uses
+state when the model and installed APIs support it, otherwise bridge.
+Forced state reports unsupported models before drawing. Simulation
+selection is independent of the likelihood backend and
+<code>emhawkes.engine</code>.</p>
+<p>See the repository’s <a href="https://github.com/ksublee/frpp/blob/main/tools/independent-simulation-results.md" class="external-link">simulation
+validation report</a> for exact-result, RNG, timing and allocation
+checks. Reported allocations are cumulative Rprofmem records, not peak
+resident memory.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -1,13 +1,14 @@
 # Simulate and Evaluate the Composition Prototype
 
-Use a compatibility bridge, or assemble a numeric FRPP likelihood from
-public emhawkes kernel replay output and the residual law.
+Use a compatibility bridge, independently simulate a numeric FRPP, or
+assemble its likelihood from public kernel calculations and the residual
+law.
 
 ## Usage
 
 ``` r
 fsim(object, size = 100, lambda_component0 = "auto", N0 = NULL,
-    Nc0 = NULL, seed = NULL, ...)
+    Nc0 = NULL, seed = NULL, ..., backend = c("bridge", "state", "auto"))
 # S3 method for class 'fspec'
 simulate(object, nsim = 1, seed = NULL, size = 100,
     lambda_component0 = "auto", N0 = NULL, Nc0 = NULL, ...)
@@ -44,7 +45,7 @@ logLik(object, inter_arrival, type = NULL, mark = NULL,
 
 - N0, Nc0:
 
-  Initial counts and mark totals, passed to emhawkes.
+  Initial counts and mark totals.
 
 - inter_arrival, type, mark:
 
@@ -60,22 +61,42 @@ logLik(object, inter_arrival, type = NULL, mark = NULL,
 
 - backend:
 
-  `bridge` delegates to the existing FRPP likelihood. `state`
-  independently assembles the residual likelihood from the kernel's
-  public replay output. This requires the emhawkes development kernel
-  API, available in GitHub development emhawkes 1.0.1.9000; with earlier
-  versions, use `bridge`.
+  For simulation, `bridge` (default) delegates to emhawkes, `state`
+  requires the independent numeric FRPP loop, and `auto` selects it when
+  supported and otherwise uses the bridge. The selector follows `...` in
+  `fsim` and must be named. For likelihood, `bridge` delegates to the
+  existing FRPP likelihood and `state` assembles residual terms from
+  public kernel replay. State paths require the corresponding APIs in
+  current GitHub development emhawkes; missing APIs give an explicit
+  error.
 
 - ...:
 
-  Additional public emhawkes arguments for the bridge. The state
-  prototype accepts none.
+  Additional public emhawkes arguments for the bridge. Simulation `auto`
+  routes additional arguments to the bridge without forcing them during
+  selection; explicit `state` accepts no additional arguments.
 
 ## Details
 
-Simulation retains the existing R FRPP loop and requires equal decay
-rates within each row. Every global event refreshes all candidate
-residuals. The state backend currently supports numeric kernels, numeric
+Simulation requires equal decay rates within each row. Every global
+event refreshes all candidate residuals. The optional independent loop
+supports plain numeric mu, alpha, beta and eta, including zero
+baselines, mapped multiple kernels and admissible signed components.
+Marks are one at each event; event baseline, impact, mark-generator and
+mark-density callbacks use the bridge. Residual generators remain user
+functions, called once with all dimensions per attempted global event.
+Residual targets must be a numeric vector with one nonnegative entry per
+event type; positive infinity is allowed.
+
+The independent loop uses exported `exp_kernel_wait` and
+`exp_kernel_step`, holding only the current component state in its
+recursion. It never calls `hsim`, never replays a growing path prefix,
+and never switches to the bridge after drawing residuals. A
+caller-supplied seed restores the caller's RNG kind and state even on
+failure. The bridge remains the default: this R reference implementation
+is currently slower for larger paths.
+
+The state likelihood backend currently supports numeric kernels, numeric
 mark effects and kernel mappings, with equal decay rates within each row
 and no impact or mark-density callbacks. Callback specifications remain
 available through the bridge. Kernel states and their integrals are
@@ -102,7 +123,7 @@ particular, the bridge does not support a forced C++ FRPP likelihood.
 Simulation returns a `frpp_path` list containing its composition model
 and the original path fields other than the transitional `hspec` field.
 Likelihood evaluation returns the existing named numeric value, or an
-inference list. The state backend additionally returns
+inference list. The state likelihood backend additionally returns
 `integrated_driver`. No fitted degrees of freedom or confidence
 intervals are supplied.
 

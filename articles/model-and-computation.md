@@ -80,7 +80,8 @@ observation interval.
 
 | Operation | Current implementation |
 |----|----|
-| Simulation | [`fsim()`](https://ksublee.github.io/frpp/reference/operations.md) uses the existing public emhawkes FRPP event loop |
+| Default simulation, `bridge` | Uses the existing public emhawkes FRPP event loop |
+| Optional simulation, `state` | FRPP owns the event loop, using public event-wise kernel calculations |
 | Default likelihood, `bridge` | Uses emhawkes’s existing FRPP likelihood |
 | Experimental likelihood, `state` | Uses public kernel replay, then assembles FRPP density and survival contributions |
 | Estimation | [`ffit()`](https://ksublee.github.io/frpp/reference/ffit.md) supplies an FRPP objective to public emhawkes parameter mapping, optimization and reconstruction |
@@ -140,6 +141,44 @@ in emhawkes.
 
 ## Next development steps
 
-Independent FRPP simulation and estimation reconstruction remain future
-work. The current public replay API is a first shared calculation
-boundary, not a complete separation of the two packages’ engines.
+The numeric independent FRPP simulator is available as an optional
+backend. Callback simulation and independent estimation reconstruction
+remain future work. The current public replay API is a first shared
+calculation boundary, not a complete separation of the two packages’
+engines.
+
+## Independent numeric simulation
+
+``` r
+
+path <- fsim(model, size = 1000, seed = 73, lambda_component0 = 0,
+             backend = "state")
+```
+
+This requires the event-wise APIs in current GitHub development
+emhawkes. FRPP draws one residual vector for all dimensions, inverts its
+integrated drivers with `exp_kernel_wait()`, chooses the first minimum
+by row, and calls `exp_kernel_step()` to decay and update mapped
+columns. It records the original path fields, counts and component
+histories. No hsim call or growing-prefix replay occurs in this backend.
+The shared calculation layer contains no RNG.
+
+The first scope is plain numeric baseline and kernel parameters,
+including numeric eta, zero baselines and admissible signed components.
+No baseline, impact, mark-generator or mark-density event callbacks run
+in this backend. Marks are one. Residual generators are retained with
+their existing parameter binding and run once per attempted global
+event. Current-state validity is checked before each new draw, and an
+error never restarts the bridge.
+
+`bridge` remains the default because the reference independent loop is
+slower for large paths. `backend = "auto"` is an explicit opt-in
+selector: it uses state when the model and installed APIs support it,
+otherwise bridge. Forced state reports unsupported models before
+drawing. Simulation selection is independent of the likelihood backend
+and `emhawkes.engine`.
+
+See the repository’s [simulation validation
+report](https://github.com/ksublee/frpp/blob/main/tools/independent-simulation-results.md)
+for exact-result, RNG, timing and allocation checks. Reported
+allocations are cumulative Rprofmem records, not peak resident memory.

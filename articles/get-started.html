@@ -172,6 +172,18 @@ general FRPP.</p>
 inference</a>, or see the <a href="frpp-examples.html">multivariate
 examples</a>.</p>
 </div>
+<div class="section level2">
+<h2 id="optional-independent-simulator">Optional independent simulator<a class="anchor" aria-label="anchor" href="#optional-independent-simulator"></a>
+</h2>
+<p>The default simulator remains the compatibility bridge. With current
+GitHub development emhawkes, choose
+<code>fsim(model, backend = "state", ...)</code> to use the independent
+numeric FRPP event loop. It preserves global residual refresh and
+path/RNG behavior, but is currently slower on larger paths. Event
+callbacks remain in the bridge. <code>backend = "auto"</code> opts into
+capability-based selection; see <a href="model-and-computation.html">Model and computation</a> for the
+support contract.</p>
+</div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
