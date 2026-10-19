@@ -292,6 +292,26 @@ validation report</a> for exact-result, RNG, timing and allocation
 checks. Reported allocations are cumulative Rprofmem records, not peak
 resident memory.</p>
 </div>
+<div class="section level2">
+<h2 id="parameter-registration-and-fitted-model-reconstruction">Parameter registration and fitted-model reconstruction<a class="anchor" aria-label="anchor" href="#parameter-registration-and-fitted-model-reconstruction"></a>
+</h2>
+<p>For numeric kernels without event callbacks and raw residual laws,
+<code><a href="../reference/ffit.html">ffit()</a></code> registers kernel matrices and the residual parameter
+vector through the public emhawkes <code>parameter_plan()</code>
+contract. Numeric matrix coordinates retain their existing reduced/full
+sharing rules; named residual coordinates retain their names. Fixed
+residual laws stay outside the fitted coordinate set.</p>
+<p>Optimization still uses public <code>hfit()</code> with the FRPP
+objective. The same parameter map rules, fixed selectors, constraints
+and optimizer controls apply. After optimization, frpp restores numeric
+components and assembles its own kernel/residual model through the
+public plan. Callback/bound-law models and older emhawkes versions
+retain the existing fitted_hspec reconstruction.</p>
+<p>The raw optimizer result and saved ffit representation remain
+available. This step separates registration/restoration; optimizer
+adapters and legacy objective preparation remain shared. It makes no new
+confidence-interval coverage or performance claim.</p>
+</div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>

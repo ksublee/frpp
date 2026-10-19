@@ -187,3 +187,25 @@ See the repository’s [simulation validation
 report](https://github.com/ksublee/frpp/blob/main/tools/independent-simulation-results.md)
 for exact-result, RNG, timing and allocation checks. Reported
 allocations are cumulative Rprofmem records, not peak resident memory.
+
+## Parameter registration and fitted-model reconstruction
+
+For numeric kernels without event callbacks and raw residual laws,
+[`ffit()`](https://ksublee.github.io/frpp/reference/ffit.md) registers
+kernel matrices and the residual parameter vector through the public
+emhawkes `parameter_plan()` contract. Numeric matrix coordinates retain
+their existing reduced/full sharing rules; named residual coordinates
+retain their names. Fixed residual laws stay outside the fitted
+coordinate set.
+
+Optimization still uses public `hfit()` with the FRPP objective. The
+same parameter map rules, fixed selectors, constraints and optimizer
+controls apply. After optimization, frpp restores numeric components and
+assembles its own kernel/residual model through the public plan.
+Callback/bound-law models and older emhawkes versions retain the
+existing fitted_hspec reconstruction.
+
+The raw optimizer result and saved ffit representation remain available.
+This step separates registration/restoration; optimizer adapters and
+legacy objective preparation remain shared. It makes no new
+confidence-interval coverage or performance claim.
