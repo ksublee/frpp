@@ -192,13 +192,13 @@ coverage or performance claim.
 Both defaults remain `"bridge"`. For example:
 
 ```{r}
-model <- fspec(methods::new("hspec", mu = 1, alpha = 0, beta = 1),
-  residual_law(c(rate = 1), stats::dexp, stats::pexp,
+model <- frpp::fspec(methods::new("hspec", mu = 1, alpha = 0, beta = 1),
+  frpp::residual_law(c(rate = 1), stats::dexp, stats::pexp,
     stats::qexp, stats::rexp))
-fit <- ffit(model, c(0, .2, .3, .5), optimizer = "stats",
+fit <- frpp::ffit(model, c(0, .2, .3, .5), optimizer = "stats",
   fixed = c(FALSE, TRUE, TRUE), lambda_component0 = 0,
   fit_backend = "independent")
-coef(fit)
+stats::coef(fit)
 fit$fitting
 ```
 

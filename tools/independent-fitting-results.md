@@ -71,3 +71,17 @@ An additional validation script initially guessed scalar fixed-parameter names
 using matrix-style names. It now reads names from the actual registered result;
 both providers' extra comparisons pass. Original failed logs are retained in
 the external validation artifact directory.
+
+
+## Standalone website correction
+
+The first GitHub documentation build found that the new guide's executable
+example used unqualified frpp functions without attaching the package. The
+initial local render had preloaded frpp and masked this missing assumption.
+The example now qualifies fspec, residual_law and ffit with frpp:: and coef with
+stats::. It passes an unattached-package render and the complete tools/build-docs.R
+site build in a fresh default Rscript session. A trial excluding the default
+methods package hit the unchanged legacy vignette's unqualified new(); the full
+site validation therefore matches GitHub's normal default-package session.
+Runtime code is unchanged by this documentation correction. All six GitHub
+compatibility jobs for e577f1d passed before the documentation-only follow-up.

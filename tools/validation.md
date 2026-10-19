@@ -193,3 +193,10 @@ and mapped numeric kernels. Explicit independent fitting must work without hfit.
 See [the independent-fitting report](independent-fitting-results.md) for exact
 comparisons and the separate 10,000-row actual refit. Keep expensive large refits
 outside the daily suite; an accuracy refit does not constitute a speed benchmark.
+
+
+Render executable guides without pre-attaching frpp. Before publishing docs,
+run `Rscript --vanilla tools/build-docs.R` in a fresh default R session with
+development dependencies installed. FRPP_DOCS_DEST can select an external output
+directory. Rendering a guide after library(frpp) is insufficient to verify the
+standalone website environment; executable examples should qualify their APIs.
