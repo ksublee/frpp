@@ -194,10 +194,16 @@ calculations</td>
 contributions</td>
 </tr>
 <tr class="odd">
-<td>Estimation</td>
+<td>Default estimation, <code>fit_backend = "bridge"</code>
+</td>
 <td>
 <code><a href="../reference/ffit.html">ffit()</a></code> supplies an FRPP objective to public emhawkes
-parameter mapping, optimization and reconstruction</td>
+fitting</td>
+</tr>
+<tr class="even">
+<td>Optional independent estimation</td>
+<td>FRPP prepares observations, registers parameters through the public
+plan, runs maxLik or stats directly and reconstructs its model</td>
 </tr>
 </tbody>
 </table>
@@ -311,6 +317,51 @@ retain the existing fitted_hspec reconstruction.</p>
 available. This step separates registration/restoration; optimizer
 adapters and legacy objective preparation remain shared. It makes no new
 confidence-interval coverage or performance claim.</p>
+</div>
+<div class="section level2">
+<h2 id="independent-numeric-fitting">Independent numeric fitting<a class="anchor" aria-label="anchor" href="#independent-numeric-fitting"></a>
+</h2>
+<p><code>fit_backend</code> selects who runs estimation;
+<code>backend</code> selects the likelihood. Both defaults remain
+<code>"bridge"</code>. For example:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">frpp</span><span class="fu">::</span><span class="fu"><a href="../reference/frpp_spec.html">fspec</a></span><span class="op">(</span><span class="fu">methods</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/methods/new.html" class="external-link">new</a></span><span class="op">(</span><span class="st">"hspec"</span>, mu <span class="op">=</span> <span class="fl">1</span>, alpha <span class="op">=</span> <span class="fl">0</span>, beta <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  <span class="fu">frpp</span><span class="fu">::</span><span class="fu"><a href="../reference/residual_law.html">residual_law</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>rate <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">dexp</a></span>, <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">pexp</a></span>,</span>
+<span>    <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">qexp</a></span>, <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">rexp</a></span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">frpp</span><span class="fu">::</span><span class="fu"><a href="../reference/ffit.html">ffit</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">.2</span>, <span class="fl">.3</span>, <span class="fl">.5</span><span class="op">)</span>, optimizer <span class="op">=</span> <span class="st">"stats"</span>,</span>
+<span>  fixed <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">FALSE</span>, <span class="cn">TRUE</span>, <span class="cn">TRUE</span><span class="op">)</span>, lambda_component0 <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  fit_backend <span class="op">=</span> <span class="st">"independent"</span><span class="op">)</span></span>
+<span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##    mu1 alpha1  beta1 </span></span>
+<span><span class="co">##      3      0      1</span></span></code></pre>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit</span><span class="op">$</span><span class="va">fitting</span></span></code></pre></div>
+<pre><code><span><span class="co">## $requested</span></span>
+<span><span class="co">## [1] "independent"</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $used</span></span>
+<span><span class="co">## [1] "independent"</span></span>
+<span><span class="co">## </span></span>
+<span><span class="co">## $fallback_reason</span></span>
+<span><span class="co">## NULL</span></span></code></pre>
+<p>This path supports plain numeric mu/alpha/beta/eta, kernel mappings
+and raw residual laws. It owns observation/count validation, explicit
+initial states, optimizer calls and result assembly. The public
+parameter plan retains matrix sharing, coordinate order and named
+residual sharing. Fixed/free selectors, linear constraints, box bounds,
+optional derivatives and validator rejection follow the existing
+provider rules. It uses no emhawkes internal functions and does not call
+hfit. The selected likelihood may still use the public bridge.</p>
+<p>Callback kernels, event callbacks, legacy bound residual laws and
+dependencies without the parameter API retain bridge fitting. An
+explicit independent request reports unsupported cases;
+<code>fit_backend = "auto"</code> records its selected route and
+fallback reason before optimization. A failed optimization is never
+retried on another path. New results retain the existing ffit accessors.
+The raw independent stats provider result has its own frpp_stats_fit
+class; maxLik retains its class. The saved result’s fitting field
+reports the route, while numerical diagnostics retain their existing
+meaning. Unavailable Wald covariance remains unavailable.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
