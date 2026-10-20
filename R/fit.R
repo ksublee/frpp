@@ -55,6 +55,7 @@ ffit <- function(object, inter_arrival, type = NULL, mark = NULL,
                  valid = NULL, ..., fit_backend = c("bridge", "independent", "auto")) {
   if (!is_fspec(object)) stop("object must be an fspec.", call. = FALSE)
   object <- as_fspec(object)
+  require_law_functions(object, c("density", if (object@kernel@dimens > 1) "cdf"))
   if (!is.logical(estimate_residual) || length(estimate_residual) != 1L || is.na(estimate_residual))
     stop("estimate_residual must be TRUE or FALSE.", call. = FALSE)
   if (!is.null(valid) && !is.function(valid)) stop("valid must be a function or NULL.", call. = FALSE)

@@ -22,10 +22,12 @@ library(frpp)
 
 kernel <- methods::new("hspec", mu = 0.3, alpha = 0.2, beta = 1)
 law <- residual_law(c(shape = 2, rate = 2),
-  stats::dgamma, stats::pgamma, stats::qgamma, stats::rgamma)
+  rresidual = stats::rgamma)
 model <- fspec(kernel, law)
 path <- fsim(model, size = 1000, seed = 73, lambda_component0 = 0)
 ```
+
+Simulation needs only `rresidual`. Supply the other residual functions when needed.
 
 The default `bridge` uses emhawkes 1.0.0 or later. Optional `state` simulation
 and likelihood use the public kernel APIs in current GitHub development emhawkes.

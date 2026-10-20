@@ -118,7 +118,7 @@ Likelihood degrees of freedom count only active optimization parameters;
 nobs excludes the initial row. Unavailable free-parameter covariance entries are NA.}
 \examples{
 model <- fspec(methods::new("hspec", mu = 1, alpha = 0, beta = 1),
-  residual_law(c(rate = 1), stats::dexp, stats::pexp, stats::qexp, stats::rexp))
+  residual_law(c(rate = 1), dresidual = stats::dexp))
 fit <- ffit(model, c(0, .2, .3, .5), optimizer = "stats",
   fixed = c(FALSE, TRUE, TRUE), lambda_component0 = 0)
 coef(fit)

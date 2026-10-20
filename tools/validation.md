@@ -200,3 +200,13 @@ run `Rscript --vanilla tools/build-docs.R` in a fresh default R session with
 development dependencies installed. FRPP_DOCS_DEST can select an external output
 directory. Rendering a guide after library(frpp) is insufficient to verify the
 standalone website environment; executable examples should qualify their APIs.
+
+
+## Residual-function names and optional callbacks
+
+The ordinary residual-interface.R fixture checks primary/alias/positional calls,
+all 16 function-presence subsets, operation-specific requirements, partial-law
+fitting, clear capability errors and unchanged RNG. See
+[the interface report](residual-interface-results.md). Numerical output, stored
+law representation, callback identity and lazy defaults are compatibility
+contracts; keep aliases and older saved laws in regression coverage.

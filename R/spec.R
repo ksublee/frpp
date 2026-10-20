@@ -2,18 +2,29 @@ residual_slots <- c(density = "dresidual", cdf = "presidual",
                     quantile = "qresidual", rng = "rresidual")
 
 # Creating a law never evaluates its callbacks or consumes random numbers.
-residual_law <- function(param = numeric(), density = NULL, cdf = NULL,
-                         quantile = NULL, rng = NULL, name = "custom") {
+residual_law <- function(param = numeric(), dresidual = NULL, presidual = NULL,
+                         qresidual = NULL, rresidual = NULL, name = "custom",
+                         density = NULL, cdf = NULL, quantile = NULL, rng = NULL) {
   if (!is.numeric(param) || is.complex(param) || !is.null(dim(param)) ||
       any(!is.finite(param)) || (length(param) &&
       (is.null(names(param)) || anyNA(names(param)) || any(names(param) == "") ||
        anyDuplicated(names(param)))))
     stop("param must be a finite numeric vector with unique, nonempty names.", call. = FALSE)
+  resolve <- function(primary, alias, primary_name, alias_name) {
+    if (!is.null(primary) && !is.null(alias))
+      stop("Supply only one of '", primary_name, "' or '", alias_name, "'.", call. = FALSE)
+    if (is.null(primary)) alias else primary
+  }
+  density <- resolve(dresidual, density, "dresidual", "density")
+  cdf <- resolve(presidual, cdf, "presidual", "cdf")
+  quantile <- resolve(qresidual, quantile, "qresidual", "quantile")
+  rng <- resolve(rresidual, rng, "rresidual", "rng")
+  # Keep stored keys and callback identity for saved laws and existing accessors.
   callbacks <- list(density = density, cdf = cdf, quantile = quantile, rng = rng)
   if (!all(vapply(callbacks, function(x) is.null(x) || is.function(x), logical(1))))
     stop("Residual functions must be functions or NULL.", call. = FALSE)
   if (is.null(density) && is.null(rng))
-    stop("Supply a density or a random generator for the residual law.", call. = FALSE)
+    stop("Supply dresidual (density) or rresidual (rng) for the residual law.", call. = FALSE)
   available <- unique(unlist(lapply(callbacks, function(f) {
     if (is.null(f)) character() else names(formals(f))[-1L]
   })))
@@ -207,5 +218,6 @@ methods::setMethod("show", "fspec", function(object) { print.fspec(object); invi
 require_law_functions <- function(object, needed) {
   absent <- needed[vapply(object@residual$functions[needed], is.null, logical(1))]
   if (length(absent)) stop("This operation requires residual function(s): ",
-    paste(absent, collapse = ", "), ".", call. = FALSE)
+    paste(paste0(unname(residual_slots[absent]), " (", absent, ")"), collapse = ", "),
+    ".", call. = FALSE)
 }

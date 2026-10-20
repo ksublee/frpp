@@ -1,5 +1,11 @@
 # frpp 0.0.0.9000
 
+- Use dresidual, presidual, qresidual and rresidual as the primary residual_law
+  arguments. Retain density, cdf, quantile and rng as compatibility aliases and
+  preserve positional calls and saved laws. Reject conflicting pairs and keep
+  per-operation requirements: generator-only simulation, density-only univariate
+  likelihood/fitting, and additional CDF/quantile functions only when needed.
+
 - Add optional independent numeric fitting with `fit_backend = "independent"`.
   FRPP owns observation preparation and calls maxLik or stats directly, using
   the public emhawkes parameter contract. Preserve the bridge default and

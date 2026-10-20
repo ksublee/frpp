@@ -43,7 +43,12 @@ in current GitHub development emhawkes; missing APIs give an explicit error.}
 \code{auto} routes additional arguments to the bridge without forcing them
 during selection; explicit \code{state} accepts no additional arguments.}
 }
-\details{Simulation requires equal decay rates within each row. Every global
+\details{Simulation needs only \code{rresidual}. Univariate likelihood needs
+\code{dresidual}; multivariate likelihood additionally needs \code{presidual}.
+\code{infer = TRUE} also needs \code{qresidual}, and does not need a generator.
+See \code{\link{residual_law}} for compatibility aliases.
+
+Simulation requires equal decay rates within each row. Every global
 event refreshes all candidate residuals. The optional independent loop supports
 plain numeric mu, alpha, beta and eta, including zero baselines, mapped multiple
 kernels and admissible signed components. Marks are one at each event; event
