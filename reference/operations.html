@@ -116,7 +116,11 @@ during selection; explicit <code>state</code> accepts no additional arguments.</
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Simulation requires equal decay rates within each row. Every global
+    <p>Simulation needs only <code>rresidual</code>. Univariate likelihood needs
+<code>dresidual</code>; multivariate likelihood additionally needs <code>presidual</code>.
+<code>infer = TRUE</code> also needs <code>qresidual</code>, and does not need a generator.
+See <code><a href="residual_law.html">residual_law</a></code> for compatibility aliases.</p>
+<p>Simulation requires equal decay rates within each row. Every global
 event refreshes all candidate residuals. The optional independent loop supports
 plain numeric mu, alpha, beta and eta, including zero baselines, mapped multiple
 kernels and admissible signed components. Marks are one at each event; event

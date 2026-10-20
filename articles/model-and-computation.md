@@ -23,6 +23,42 @@ compatibility adapter
 [`as_legacy_hspec()`](https://ksublee.github.io/frpp/reference/frpp_spec.md)
 temporarily restores the older FRPP representation.
 
+## Supply residual functions as needed
+
+Use the same names as emhawkes: `dresidual` (density), `presidual`
+(CDF), `qresidual` (quantile) and `rresidual` (generator). All default
+to NULL. The constructor needs at least a density or generator; each
+operation then checks only its own requirements before evaluating
+callbacks or drawing randomness.
+
+| Operation                              | Required residual functions     |
+|----------------------------------------|---------------------------------|
+| Simulation                             | rresidual                       |
+| Univariate likelihood and fitting      | dresidual                       |
+| Multivariate likelihood and fitting    | dresidual, presidual            |
+| Residual diagnostics with infer = TRUE | dresidual, presidual, qresidual |
+
+For simulation alone:
+
+``` r
+
+simulation_law <- frpp::residual_law(c(rate = 1), rresidual = stats::rexp)
+simulation_model <- frpp::fspec(
+  methods::new("hspec", mu = 1, alpha = 0, beta = 1), simulation_law)
+simulation_path <- frpp::fsim(simulation_model, size = 5, seed = 73,
+  lambda_component0 = 0)
+simulation_path$inter_arrival
+```
+
+    ## [1] 0.00000000 0.75075454 0.24561278 0.07472991 1.48571875
+
+The aliases `density`, `cdf`, `quantile` and `rng` remain supported
+without warnings, in that order. You can mix names for different roles,
+but supplying both non-NULL names for one role is an error. The original
+six positional arguments retain their order. Saved laws retain their
+existing internal representation and callback environments/defaults; no
+conversion is needed.
+
 ## Exponential state and event mapping
 
 For event type $`i`$, the numeric driver is
@@ -219,8 +255,7 @@ likelihood. Both defaults remain `"bridge"`. For example:
 ``` r
 
 model <- frpp::fspec(methods::new("hspec", mu = 1, alpha = 0, beta = 1),
-  frpp::residual_law(c(rate = 1), stats::dexp, stats::pexp,
-    stats::qexp, stats::rexp))
+  frpp::residual_law(c(rate = 1), dresidual = stats::dexp))
 fit <- frpp::ffit(model, c(0, .2, .3, .5), optimizer = "stats",
   fixed = c(FALSE, TRUE, TRUE), lambda_component0 = 0,
   fit_backend = "independent")

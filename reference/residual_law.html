@@ -54,8 +54,9 @@ without evaluating the functions or drawing random numbers.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">residual_law</span><span class="op">(</span>param <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="op">)</span>, density <span class="op">=</span> <span class="cn">NULL</span>, cdf <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>             quantile <span class="op">=</span> <span class="cn">NULL</span>, rng <span class="op">=</span> <span class="cn">NULL</span>, name <span class="op">=</span> <span class="st">"custom"</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">residual_law</span><span class="op">(</span>param <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="op">)</span>, dresidual <span class="op">=</span> <span class="cn">NULL</span>, presidual <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>             qresidual <span class="op">=</span> <span class="cn">NULL</span>, rresidual <span class="op">=</span> <span class="cn">NULL</span>, name <span class="op">=</span> <span class="st">"custom"</span>,</span>
+<span>             density <span class="op">=</span> <span class="cn">NULL</span>, cdf <span class="op">=</span> <span class="cn">NULL</span>, quantile <span class="op">=</span> <span class="cn">NULL</span>, rng <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -65,11 +66,18 @@ without evaluating the functions or drawing random numbers.</p>
 <dl><dt id="arg-param">param<a class="anchor" aria-label="anchor" href="#arg-param"></a></dt>
 <dd><p>Finite numeric vector with unique, nonempty parameter names.</p></dd>
 
-<dt id="arg-density-cdf-quantile-rng">density, cdf, quantile, rng<a class="anchor" aria-label="anchor" href="#arg-density-cdf-quantile-rng"></a></dt>
-<dd><p>Distribution functions, or <code>NULL</code>.
+<dt id="arg-dresidual-presidual-qresidual-rresidual">dresidual, presidual, qresidual, rresidual<a class="anchor" aria-label="anchor" href="#arg-dresidual-presidual-qresidual-rresidual"></a></dt>
+<dd><p>Residual density, cumulative
+distribution, quantile and random-generation functions, or <code>NULL</code>.
 Use R distribution signatures: the variate, probability or sample count is the
 first argument. Named parameters are matched to explicit formal arguments as in
 <code><a href="https://ksublee.github.io/emhawkes/reference/set_residual.html" class="external-link">emhawkes::set_residual</a></code>. Log-density and tail options are supported there.</p></dd>
+
+<dt id="arg-density-cdf-quantile-rng">density, cdf, quantile, rng<a class="anchor" aria-label="anchor" href="#arg-density-cdf-quantile-rng"></a></dt>
+<dd><p>Compatibility aliases for <code>dresidual</code>,
+<code>presidual</code>, <code>qresidual</code> and <code>rresidual</code>, respectively.
+Supply at most one non-NULL function per pair; specifying both is an error,
+even when they are the same function. No deprecation warning is emitted.</p></dd>
 
 <dt id="arg-name">name<a class="anchor" aria-label="anchor" href="#arg-name"></a></dt>
 <dd><p>A descriptive label, not a verified distribution-family identifier.</p></dd>
@@ -77,9 +85,16 @@ first argument. Named parameters are matched to explicit formal arguments as in
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>At least a density or random generator is required. Simulation needs a
-generator; likelihood evaluation needs a density, and multivariate likelihoods
-also need a CDF. Residual inference needs a CDF and quantile function.
+    <p>Supply only the functions needed for your operation. Construction
+requires at least <code>dresidual</code> or <code>rresidual</code>. Simulation needs only
+<code>rresidual</code>; univariate likelihood and fitting need only <code>dresidual</code>.
+Multivariate likelihood and fitting additionally need <code>presidual</code>.
+<code>infer = TRUE</code> needs <code>dresidual</code>, <code>presidual</code> and <code>qresidual</code>,
+and does not require <code>rresidual</code>. Missing functions are reported when an
+operation requires them, before callbacks or random draws.
+The original positional order of the first six arguments is unchanged.
+Stored law objects keep their existing representation, and callback functions,
+environments and defaults are preserved.
 The constructor does not establish consistency of user-supplied functions,
 normalization of residual scale, existence of moments, or parameter identification.</p>
     </div>
@@ -88,6 +103,22 @@ normalization of residual scale, existence of moments, or parameter identificati
     <p>An object of class <code>frpp_residual_law</code>.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Simulation needs only a residual generator.</span></span></span>
+<span class="r-in"><span><span class="va">law</span> <span class="op">&lt;-</span> <span class="fu">residual_law</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>rate <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, rresidual <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">rexp</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="frpp_spec.html">fspec</a></span><span class="op">(</span><span class="fu">methods</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/methods/new.html" class="external-link">new</a></span><span class="op">(</span><span class="st">"hspec"</span>, mu <span class="op">=</span> <span class="fl">1</span>, alpha <span class="op">=</span> <span class="fl">0</span>, beta <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, <span class="va">law</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="operations.html">fsim</a></span><span class="op">(</span><span class="va">model</span>, size <span class="op">=</span> <span class="fl">4</span>, seed <span class="op">=</span> <span class="fl">73</span>, lambda_component0 <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> FRPP path: 3 events, 1 event types.</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Density alone is enough for a univariate likelihood.</span></span></span>
+<span class="r-in"><span><span class="va">law</span> <span class="op">&lt;-</span> <span class="fu">residual_law</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>rate <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, dresidual <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">dexp</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="frpp_spec.html">fspec</a></span><span class="op">(</span><span class="fu">methods</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/methods/new.html" class="external-link">new</a></span><span class="op">(</span><span class="st">"hspec"</span>, mu <span class="op">=</span> <span class="fl">1</span>, alpha <span class="op">=</span> <span class="fl">0</span>, beta <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, <span class="va">law</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">.2</span>, <span class="fl">.3</span><span class="op">)</span>, lambda_component0 <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> loglikelihood </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          -0.5 </span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

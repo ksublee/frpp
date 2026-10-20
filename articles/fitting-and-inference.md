@@ -10,8 +10,7 @@ effect. Fix the excitation and decay parameters in this example.
 
 model <- fspec(
   methods::new("hspec", mu = 1, alpha = 0, beta = 1),
-  residual_law(c(rate = 1), stats::dexp, stats::pexp,
-    stats::qexp, stats::rexp))
+  residual_law(c(rate = 1), dresidual = stats::dexp))
 dt <- c(0, 0.2, 0.3, 0.5)
 fit <- ffit(model, dt, optimizer = "stats", lambda_component0 = 0,
   fixed = c(FALSE, TRUE, TRUE), control = list(reltol = 1e-12))

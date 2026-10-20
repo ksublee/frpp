@@ -102,8 +102,8 @@ following law has Gamma shape 2 and rate 2, hence mean 1:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">kernel</span> <span class="op">&lt;-</span> <span class="fu">methods</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/methods/new.html" class="external-link">new</a></span><span class="op">(</span><span class="st">"hspec"</span>, mu <span class="op">=</span> <span class="fl">0.3</span>, alpha <span class="op">=</span> <span class="fl">0.2</span>, beta <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">law</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/residual_law.html">residual_law</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>shape <span class="op">=</span> <span class="fl">2</span>, rate <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
-<span>  density <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">dgamma</a></span>, cdf <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">pgamma</a></span>,</span>
-<span>  quantile <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">qgamma</a></span>, rng <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">rgamma</a></span>, name <span class="op">=</span> <span class="st">"Gamma(2,2)"</span><span class="op">)</span></span>
+<span>  dresidual <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">dgamma</a></span>, presidual <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">pgamma</a></span>,</span>
+<span>  qresidual <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">qgamma</a></span>, rresidual <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/GammaDist.html" class="external-link">rgamma</a></span>, name <span class="op">=</span> <span class="st">"Gamma(2,2)"</span><span class="op">)</span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/frpp_spec.html">fspec</a></span><span class="op">(</span><span class="va">kernel</span>, <span class="va">law</span><span class="op">)</span></span>
 <span><span class="va">model</span></span>
 <span><span class="co">#&gt; FRPP specification (S4 fspec)</span></span>
@@ -120,9 +120,63 @@ mappings are supported; more general callbacks use the compatibility
 backend.</p>
 </div>
 <div class="section level2">
+<h2 id="supply-residual-functions-as-needed">Supply residual functions as needed<a class="anchor" aria-label="anchor" href="#supply-residual-functions-as-needed"></a>
+</h2>
+<p>Use the same names as emhawkes: <code>dresidual</code> (density),
+<code>presidual</code> (CDF), <code>qresidual</code> (quantile) and
+<code>rresidual</code> (generator). All default to NULL. The constructor
+needs at least a density or generator; each operation then checks only
+its own requirements before evaluating callbacks or drawing
+randomness.</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Operation</th>
+<th>Required residual functions</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Simulation</td>
+<td>rresidual</td>
+</tr>
+<tr class="even">
+<td>Univariate likelihood and fitting</td>
+<td>dresidual</td>
+</tr>
+<tr class="odd">
+<td>Multivariate likelihood and fitting</td>
+<td>dresidual, presidual</td>
+</tr>
+<tr class="even">
+<td>Residual diagnostics with infer = TRUE</td>
+<td>dresidual, presidual, qresidual</td>
+</tr>
+</tbody>
+</table>
+<p>For simulation alone:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">simulation_law</span> <span class="op">&lt;-</span> <span class="fu">frpp</span><span class="fu">::</span><span class="fu"><a href="../reference/residual_law.html">residual_law</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>rate <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, rresidual <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">rexp</a></span><span class="op">)</span></span>
+<span><span class="va">simulation_model</span> <span class="op">&lt;-</span> <span class="fu">frpp</span><span class="fu">::</span><span class="fu"><a href="../reference/frpp_spec.html">fspec</a></span><span class="op">(</span></span>
+<span>  <span class="fu">methods</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/methods/new.html" class="external-link">new</a></span><span class="op">(</span><span class="st">"hspec"</span>, mu <span class="op">=</span> <span class="fl">1</span>, alpha <span class="op">=</span> <span class="fl">0</span>, beta <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, <span class="va">simulation_law</span><span class="op">)</span></span>
+<span><span class="va">simulation_path</span> <span class="op">&lt;-</span> <span class="fu">frpp</span><span class="fu">::</span><span class="fu"><a href="../reference/operations.html">fsim</a></span><span class="op">(</span><span class="va">simulation_model</span>, size <span class="op">=</span> <span class="fl">5</span>, seed <span class="op">=</span> <span class="fl">73</span>,</span>
+<span>  lambda_component0 <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">simulation_path</span><span class="op">$</span><span class="va">inter_arrival</span></span>
+<span><span class="co">#&gt; [1] 0.00000000 0.75075454 0.24561278 0.07472991 1.48571875</span></span></code></pre></div>
+<p>The aliases <code>density</code>, <code>cdf</code>,
+<code>quantile</code> and <code>rng</code> remain supported without
+warnings, in that order. You can mix names for different roles, but
+supplying both non-NULL names for one role is an error. The original six
+positional arguments retain their order. Saved laws retain their
+existing internal representation and callback environments/defaults; no
+conversion is needed.</p>
+</div>
+<div class="section level2">
 <h2 id="simulate-and-inspect-a-path">Simulate and inspect a path<a class="anchor" aria-label="anchor" href="#simulate-and-inspect-a-path"></a>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/operations.html">fsim</a></span><span class="op">(</span><span class="va">model</span>, size <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">73</span>, lambda_component0 <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="va">path</span><span class="op">$</span><span class="va">inter_arrival</span><span class="op">)</span>,</span>
 <span>  type <span class="op">=</span> <span class="va">path</span><span class="op">$</span><span class="va">type</span>, mark <span class="op">=</span> <span class="va">path</span><span class="op">$</span><span class="va">mark</span><span class="op">)</span><span class="op">)</span></span>
@@ -145,7 +199,7 @@ component; a matrix must match the kernel shape. FRPP’s automatic rule
 selects zero, with a message recommending an explicit state. A Hawkes
 stationary mean is not assumed for a general residual law.</p>
 <p>The standard interface returns the same path:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">same_path</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/simulate.html" class="external-link">simulate</a></span><span class="op">(</span><span class="va">model</span>, size <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">73</span>,</span>
 <span>  lambda_component0 <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">path</span>, <span class="va">same_path</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -156,7 +210,7 @@ simulation advances the caller’s RNG normally.</p>
 <div class="section level2">
 <h2 id="evaluate-the-likelihood">Evaluate the likelihood<a class="anchor" aria-label="anchor" href="#evaluate-the-likelihood"></a>
 </h2>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">path</span><span class="op">$</span><span class="va">inter_arrival</span>, <span class="va">path</span><span class="op">$</span><span class="va">type</span>, mark <span class="op">=</span> <span class="va">path</span><span class="op">$</span><span class="va">mark</span>,</span>
 <span>  lambda_component0 <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="co">#&gt; loglikelihood </span></span>

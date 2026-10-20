@@ -78,6 +78,13 @@ logLik(object, inter_arrival, type = NULL, mark = NULL,
 
 ## Details
 
+Simulation needs only `rresidual`. Univariate likelihood needs
+`dresidual`; multivariate likelihood additionally needs `presidual`.
+`infer = TRUE` also needs `qresidual`, and does not need a generator.
+See
+[`residual_law`](https://ksublee.github.io/frpp/reference/residual_law.md)
+for compatibility aliases.
+
 Simulation requires equal decay rates within each row. Every global
 event refreshes all candidate residuals. The optional independent loop
 supports plain numeric mu, alpha, beta and eta, including zero

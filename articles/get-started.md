@@ -33,8 +33,8 @@ law has Gamma shape 2 and rate 2, hence mean 1:
 
 kernel <- methods::new("hspec", mu = 0.3, alpha = 0.2, beta = 1)
 law <- residual_law(c(shape = 2, rate = 2),
-  density = stats::dgamma, cdf = stats::pgamma,
-  quantile = stats::qgamma, rng = stats::rgamma, name = "Gamma(2,2)")
+  dresidual = stats::dgamma, presidual = stats::pgamma,
+  qresidual = stats::qgamma, rresidual = stats::rgamma, name = "Gamma(2,2)")
 model <- fspec(kernel, law)
 model
 #> FRPP specification (S4 fspec)
@@ -52,6 +52,41 @@ For simulation, the current implementation requires equal decay rates
 within each row of the kernel matrix. Numeric marked effects and kernel
 mappings are supported; more general callbacks use the compatibility
 backend.
+
+## Supply residual functions as needed
+
+Use the same names as emhawkes: `dresidual` (density), `presidual`
+(CDF), `qresidual` (quantile) and `rresidual` (generator). All default
+to NULL. The constructor needs at least a density or generator; each
+operation then checks only its own requirements before evaluating
+callbacks or drawing randomness.
+
+| Operation                              | Required residual functions     |
+|----------------------------------------|---------------------------------|
+| Simulation                             | rresidual                       |
+| Univariate likelihood and fitting      | dresidual                       |
+| Multivariate likelihood and fitting    | dresidual, presidual            |
+| Residual diagnostics with infer = TRUE | dresidual, presidual, qresidual |
+
+For simulation alone:
+
+``` r
+
+simulation_law <- frpp::residual_law(c(rate = 1), rresidual = stats::rexp)
+simulation_model <- frpp::fspec(
+  methods::new("hspec", mu = 1, alpha = 0, beta = 1), simulation_law)
+simulation_path <- frpp::fsim(simulation_model, size = 5, seed = 73,
+  lambda_component0 = 0)
+simulation_path$inter_arrival
+#> [1] 0.00000000 0.75075454 0.24561278 0.07472991 1.48571875
+```
+
+The aliases `density`, `cdf`, `quantile` and `rng` remain supported
+without warnings, in that order. You can mix names for different roles,
+but supplying both non-NULL names for one role is an error. The original
+six positional arguments retain their order. Saved laws retain their
+existing internal representation and callback environments/defaults; no
+conversion is needed.
 
 ## Simulate and inspect a path
 

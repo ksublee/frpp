@@ -104,6 +104,60 @@ silently applied to it. The compatibility adapter
 representation.</p>
 </div>
 <div class="section level2">
+<h2 id="supply-residual-functions-as-needed">Supply residual functions as needed<a class="anchor" aria-label="anchor" href="#supply-residual-functions-as-needed"></a>
+</h2>
+<p>Use the same names as emhawkes: <code>dresidual</code> (density),
+<code>presidual</code> (CDF), <code>qresidual</code> (quantile) and
+<code>rresidual</code> (generator). All default to NULL. The constructor
+needs at least a density or generator; each operation then checks only
+its own requirements before evaluating callbacks or drawing
+randomness.</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Operation</th>
+<th>Required residual functions</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Simulation</td>
+<td>rresidual</td>
+</tr>
+<tr class="even">
+<td>Univariate likelihood and fitting</td>
+<td>dresidual</td>
+</tr>
+<tr class="odd">
+<td>Multivariate likelihood and fitting</td>
+<td>dresidual, presidual</td>
+</tr>
+<tr class="even">
+<td>Residual diagnostics with infer = TRUE</td>
+<td>dresidual, presidual, qresidual</td>
+</tr>
+</tbody>
+</table>
+<p>For simulation alone:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">simulation_law</span> <span class="op">&lt;-</span> <span class="fu">frpp</span><span class="fu">::</span><span class="fu"><a href="../reference/residual_law.html">residual_law</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>rate <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, rresidual <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">rexp</a></span><span class="op">)</span></span>
+<span><span class="va">simulation_model</span> <span class="op">&lt;-</span> <span class="fu">frpp</span><span class="fu">::</span><span class="fu"><a href="../reference/frpp_spec.html">fspec</a></span><span class="op">(</span></span>
+<span>  <span class="fu">methods</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/methods/new.html" class="external-link">new</a></span><span class="op">(</span><span class="st">"hspec"</span>, mu <span class="op">=</span> <span class="fl">1</span>, alpha <span class="op">=</span> <span class="fl">0</span>, beta <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, <span class="va">simulation_law</span><span class="op">)</span></span>
+<span><span class="va">simulation_path</span> <span class="op">&lt;-</span> <span class="fu">frpp</span><span class="fu">::</span><span class="fu"><a href="../reference/operations.html">fsim</a></span><span class="op">(</span><span class="va">simulation_model</span>, size <span class="op">=</span> <span class="fl">5</span>, seed <span class="op">=</span> <span class="fl">73</span>,</span>
+<span>  lambda_component0 <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">simulation_path</span><span class="op">$</span><span class="va">inter_arrival</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 0.00000000 0.75075454 0.24561278 0.07472991 1.48571875</span></span></code></pre>
+<p>The aliases <code>density</code>, <code>cdf</code>,
+<code>quantile</code> and <code>rng</code> remain supported without
+warnings, in that order. You can mix names for different roles, but
+supplying both non-NULL names for one role is an error. The original six
+positional arguments retain their order. Saved laws retain their
+existing internal representation and callback environments/defaults; no
+conversion is needed.</p>
+</div>
+<div class="section level2">
 <h2 id="exponential-state-and-event-mapping">Exponential state and event mapping<a class="anchor" aria-label="anchor" href="#exponential-state-and-event-mapping"></a>
 </h2>
 <p>For event type
@@ -264,7 +318,7 @@ engines.</p>
 <div class="section level2">
 <h2 id="independent-numeric-simulation">Independent numeric simulation<a class="anchor" aria-label="anchor" href="#independent-numeric-simulation"></a>
 </h2>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/operations.html">fsim</a></span><span class="op">(</span><span class="va">model</span>, size <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">73</span>, lambda_component0 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>             backend <span class="op">=</span> <span class="st">"state"</span><span class="op">)</span></span></code></pre></div>
 <p>This requires the event-wise APIs in current GitHub development
@@ -324,17 +378,16 @@ confidence-interval coverage or performance claim.</p>
 <p><code>fit_backend</code> selects who runs estimation;
 <code>backend</code> selects the likelihood. Both defaults remain
 <code>"bridge"</code>. For example:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">frpp</span><span class="fu">::</span><span class="fu"><a href="../reference/frpp_spec.html">fspec</a></span><span class="op">(</span><span class="fu">methods</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/methods/new.html" class="external-link">new</a></span><span class="op">(</span><span class="st">"hspec"</span>, mu <span class="op">=</span> <span class="fl">1</span>, alpha <span class="op">=</span> <span class="fl">0</span>, beta <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
-<span>  <span class="fu">frpp</span><span class="fu">::</span><span class="fu"><a href="../reference/residual_law.html">residual_law</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>rate <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">dexp</a></span>, <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">pexp</a></span>,</span>
-<span>    <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">qexp</a></span>, <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">rexp</a></span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu">frpp</span><span class="fu">::</span><span class="fu"><a href="../reference/residual_law.html">residual_law</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>rate <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, dresidual <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">dexp</a></span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">frpp</span><span class="fu">::</span><span class="fu"><a href="../reference/ffit.html">ffit</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">.2</span>, <span class="fl">.3</span>, <span class="fl">.5</span><span class="op">)</span>, optimizer <span class="op">=</span> <span class="st">"stats"</span>,</span>
 <span>  fixed <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">FALSE</span>, <span class="cn">TRUE</span>, <span class="cn">TRUE</span><span class="op">)</span>, lambda_component0 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  fit_backend <span class="op">=</span> <span class="st">"independent"</span><span class="op">)</span></span>
 <span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##    mu1 alpha1  beta1 </span></span>
 <span><span class="co">##      3      0      1</span></span></code></pre>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span><span class="op">$</span><span class="va">fitting</span></span></code></pre></div>
 <pre><code><span><span class="co">## $requested</span></span>
 <span><span class="co">## [1] "independent"</span></span>

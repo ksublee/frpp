@@ -32,8 +32,8 @@ reported as unavailable rather than as successful checks.
 ``` r
 
 tz_law <- residual_law(c(a = 0.7, ell = 1.6),
-  density = emhawkes::dtzexp, cdf = emhawkes::ptzexp,
-  quantile = emhawkes::qtzexp, rng = emhawkes::rtzexp, name = "tzexp")
+  dresidual = emhawkes::dtzexp, presidual = emhawkes::ptzexp,
+  qresidual = emhawkes::qtzexp, rresidual = emhawkes::rtzexp, name = "tzexp")
 model_1d <- fspec(
   methods::new("hspec", mu = 0.5, alpha = 1, beta = 1.2), tz_law)
 set.seed(1107)
